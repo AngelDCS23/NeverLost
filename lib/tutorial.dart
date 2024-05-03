@@ -1,11 +1,6 @@
-//imports
 import 'package:flutter/material.dart';
+import 'package:neverlost/constants.dart';
 import 'package:page_view_dot_indicator/page_view_dot_indicator.dart';
-
-//constants
-const backgroundColor = Color(0xFF142942);
-const bone = Color(0xFFfefced);
-const fontColorMain = Colors.white;
 
 class tutorial extends StatefulWidget {
   @override
@@ -23,7 +18,6 @@ class _tutorial extends State<tutorial> {
     _pageController = PageController(initialPage: selectedPage);
   }
 
-//En esta función obtengo el valor de la variable index para asignarle un mensaje personalizado.
   String texto($index) {
     if ($index == 0) {
       return 'A continuación tendrás una guía paso a paso de como utilizar NeverLost';
@@ -36,12 +30,10 @@ class _tutorial extends State<tutorial> {
     } else if ($index == 4) {
       return 'Con esto ya estarías listo para utilizar Neverlost, esperamos que te guste';
     }
-    return 'asdasd';
+    return 'Sin Foto';
   }
 
   String imagen($index) {
-    //RECUERDA QUE TODAS LAS IMÁGENES TIENES QUE TENER LAS MISMAS DIMENSIONES O SI NO,
-    //ALGUNAS SE VERAN MÁS GRANDES QUE OTRAS.
     if ($index == 0) {
       return 'assets/info_blanco2.png';
     } else if ($index == 1) {
@@ -49,11 +41,11 @@ class _tutorial extends State<tutorial> {
     } else if ($index == 2) {
       return 'assets/tutorial/camara-ar190px.png';
     } else if ($index == 3) {
-      return 'assets/tutorial/billete-de-avion170.png';
+      return 'assets/tutorial/billete-de-avion160px.png';
     } else if ($index == 4) {
-      return 'assets/tutorial/billete-de-avion170.png';
+      return 'assets/tutorial/cheque128px.png';
     }
-    return 'assets/logo.png';
+    return 'assets/error128px.png';
   }
 
   @override
@@ -66,7 +58,7 @@ class _tutorial extends State<tutorial> {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: Constantes.backgroundColor,
         body: SafeArea(
           child: Column(
             children: [
@@ -78,7 +70,6 @@ class _tutorial extends State<tutorial> {
                       selectedPage = page;
                     });
                   },
-                  //
                   children: List.generate(pageCount, (index) {
                     return Center(
                         child: Column(
@@ -93,7 +84,6 @@ class _tutorial extends State<tutorial> {
                         Container(
                           width: 300,
                           child: Text(
-                            //aquí llamo a la función "texto" y le paso como argumento de entrada el index para que sepa en que "página" está.
                             texto(index),
                             textAlign: TextAlign.justify,
                             style: TextStyle(
@@ -101,9 +91,28 @@ class _tutorial extends State<tutorial> {
                                 fontSize: 21,
                                 height: 1.3,
                                 letterSpacing: 0,
-                                color: fontColorMain,
+                                color: Constantes.fontColorMain,
                                 fontWeight: FontWeight.bold),
                           ),
+                        ),
+                        SizedBox(
+                          height: 80,
+                        ),
+                        Visibility(
+                          visible: (selectedPage == 4),
+                          child: ElevatedButton(onPressed: (){
+                          Navigator.pushNamed(context, '/menu');
+                        }, child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Text(
+                              'Inicio',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Constantes.backgroundColor
+                              ),
+                            ),
+                          ),
+                        )
                         ),
                       ],
                     ));

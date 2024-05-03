@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neverlost/inicio.dart';
 import 'package:neverlost/tutorial.dart';
+import 'package:neverlost/menu.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -8,6 +9,7 @@ void main() {
     routes: {
       '/primeraPantalla': (context) => inicio(),
       '/pantallaTutorial': (context) => tutorial(),
+      '/menu': (conext) => menu(),
     },
   ));
 }
