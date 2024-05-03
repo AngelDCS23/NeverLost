@@ -38,6 +38,7 @@ dependencies:
   page_view_dot_indicator: ^2.3.0
   loading_animation_widget: ^1.2.1
   animated_bottom_navigation_bar: ^1.3.3
+  qr_code_scanner: ^1.0.1
 
 
 dev_dependencies:
