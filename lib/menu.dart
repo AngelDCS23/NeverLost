@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:neverlost/constants.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class menu extends StatefulWidget {
   @override
@@ -13,10 +15,45 @@ class menu extends StatefulWidget {
 
 class _Menu extends State<menu> {
 
-  Barcode? result;
-  QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  String? ruta_Pantalla;
+  late Stream<Position> _positionStream;
+    String _locationMessage = '';
+
+    @override
+    void initState() {
+      super.initState();
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: AndroidSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 2, // distancia mínima en metros para que se actualice la ubicación
+        ),
+      );
+      _positionStream.listen((Position position) {
+        setState(() {
+          _locationMessage =
+              'Latitud: ${position.latitude}, Longitud: ${position.longitude}';
+        });
+      });
+    }
+    
+  final Completer<GoogleMapController> _controller =
+        Completer<GoogleMapController>();
+
+    static const CameraPosition _kGooglePlex = CameraPosition(
+      target: LatLng(36.576752, -4.583733),
+      zoom: 19.7,
+    );
+
+    static const CameraPosition _kLake = CameraPosition( //ESTO SE TIENE QUE CAMBIAR EN CASO DE QUE QUIERA QUE EXISTA UNA UBICACIÓN A LA QUE IR
+        bearing: 192.8334901395799,
+        target: LatLng(37.43296265331129, -122.08832357078792),
+        tilt: 59.440717697143555,
+        zoom: 19.151926040649414
+    );
+
+    Barcode? result;
+    QRViewController? controller;
+    final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+    String? ruta_Pantalla;
 
   final iconList = <IconData>[
     Icons.qr_code,
@@ -44,10 +81,17 @@ class _Menu extends State<menu> {
                 child: _buildQrView(context)), //Llamamos a la función del QR
           ),
           Visibility(
-            visible: _bottomNavIndex == 1,
-            child: 
-            Text('MAPA')
+          visible: _bottomNavIndex == 1,
+          child: Expanded(
+            child: GoogleMap(
+              mapType: MapType.hybrid,
+              initialCameraPosition: _kGooglePlex,
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
+            ),
           ),
+        ),
           Visibility(
             visible: _bottomNavIndex == 2,
             child: 
