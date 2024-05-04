@@ -5,7 +5,7 @@
         android:icon="@mipmap/ic_launcher">
         <!-- Key del WIdget de Google maps -->
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="AIzaSyCJYp5LT6_McyDVJGQgiJVsczRBh70wA9M"/>
+               android:value=""/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
