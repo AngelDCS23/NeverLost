@@ -1,7 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:neverlost/constants.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class inicio extends StatefulWidget {
   @override
@@ -29,8 +31,25 @@ class _inicio extends State<inicio> {
             SizedBox(
               height: 200.0,
               width: 350.0,
-              child: Image.asset('assets/logo.png'),
+              child: SvgPicture.asset(
+                'assets/NeverLost.svg',
+                width: 200, // ajusta el ancho según sea necesario
+                height: 200, // ajusta la altura según sea necesario
+              ),
             ),
+            SizedBox(
+              height: 20,
+            ), 
+            Text('NeverLost',
+              style: GoogleFonts.montserrat(
+                fontSize: 35,
+                color: Colors.white,
+                fontWeight: FontWeight.w600
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),   
             LoadingAnimationWidget.staggeredDotsWave(
             color: Colors.white,
             size: 40,

@@ -33,6 +33,21 @@ class _tutorial extends State<tutorial> {
     return 'Sin Foto';
   }
 
+  String titulo($index) {
+    if ($index == 0) {
+      return 'Tutorial';
+    } else if ($index == 1) {
+      return 'Escanear QR';
+    } else if ($index == 2) {
+      return 'Una vez tengas escaneado el billete solo tendrás que ir al apartado AR y disfrutar de la experiencia NeverLost';
+    } else if ($index == 3) {
+      return 'En caso de que quieras eliminar algun billete escanado solo tendrás que acceder a tu menú y quitarlo desde ahí';
+    } else if ($index == 4) {
+      return 'Con esto ya estarías listo para utilizar Neverlost, esperamos que te guste';
+    }
+    return 'Sin Foto';
+  }
+
   String imagen($index) {
     if ($index == 0) {
       return 'assets/info_blanco2.png';
@@ -75,11 +90,11 @@ class _tutorial extends State<tutorial> {
                         child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(
+                        Container(
+                          width: 300,
+                          child: Image.asset(
                           imagen(index),
                         ),
-                        SizedBox(
-                          height: 50,
                         ),
                         Container(
                           width: 300,

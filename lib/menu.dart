@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:neverlost/constants.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class menu extends StatefulWidget { 
+class menu extends StatefulWidget {
   @override
   _Menu createState() => _Menu();
 }
@@ -138,4 +139,3 @@ class _Menu extends State<menu> {
     super.dispose();
   }
 }
-
