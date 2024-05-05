@@ -1,11 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permisos de ubicación para geolocator -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:label="neverlost"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <!-- Key del WIdget de Google maps -->
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value=""/>
+               android:value="AIzaSyCJYp5LT6_McyDVJGQgiJVsczRBh70wA9M"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

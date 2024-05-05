@@ -13,10 +13,13 @@ class menu extends StatefulWidget {
   _Menu createState() => _Menu();
 }
 
+
 class _Menu extends State<menu> {
 
   late Stream<Position> _positionStream;
-    String _locationMessage = '';
+  String _locationMessage = '';
+  Set<Marker> _markers = {};
+  Set<Polygon> _polygons = {};
 
     @override
     void initState() {
@@ -31,9 +34,46 @@ class _Menu extends State<menu> {
         setState(() {
           _locationMessage =
               'Latitud: ${position.latitude}, Longitud: ${position.longitude}';
+              _markers.clear();
+              _markers.add(
+                Marker(
+                  markerId: MarkerId('current_position'),
+                  position: LatLng(position.latitude, position.longitude),
+                  infoWindow: InfoWindow(
+                    title: 'Mi posición',
+                    snippet:
+                  'Latitud: ${position.latitude}, Longitud: ${position.longitude}',
+                  ),
+                ),
+              );
         });
       });
+      //_createSquarePolygon();
     }
+
+  //   void _createSquarePolygon() {
+  //   // Coordenadas del cuadrado
+  //   List<LatLng> squareCoordinates = [
+  //     LatLng(36.576838, -4.583353), // Esquina superior izquierda
+  //     LatLng(36.576726, -4.583389), // Esquina superior derecha
+  //     LatLng(36.576743, -4.583522), // Esquina inferior derecha
+  //     LatLng(36.576845, -4.583455), // Esquina inferior izquierda
+  //   ];
+
+  //   // Crear el polígono cuadrado
+  //   Polygon squarePolygon = Polygon(
+  //     polygonId: PolygonId('square'),
+  //     points: squareCoordinates,
+  //     strokeWidth: 2,
+  //     strokeColor: Colors.blue, // Color del borde del polígono
+  //     fillColor: Colors.blue.withOpacity(1), // Color de relleno del polígono
+  //   );
+
+  //   // Añadir el polígono al conjunto de polígonos
+  //   setState(() {
+  //     _polygons.add(squarePolygon);
+  //   });
+  // }
     
   final Completer<GoogleMapController> _controller =
         Completer<GoogleMapController>();
@@ -64,6 +104,8 @@ class _Menu extends State<menu> {
 
   var _bottomNavIndex = 0; 
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,6 +131,8 @@ class _Menu extends State<menu> {
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
+              markers: _markers,
+              //polygons: _polygons, 
             ),
           ),
         ),

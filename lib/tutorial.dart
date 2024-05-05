@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neverlost/constants.dart';
 import 'package:page_view_dot_indicator/page_view_dot_indicator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class tutorial extends StatefulWidget {
   @override
@@ -115,9 +116,19 @@ class _tutorial extends State<tutorial> {
                         ),
                         Visibility(
                           visible: (selectedPage == 4),
-                          child: ElevatedButton(onPressed: (){
-                          Navigator.pushNamed(context, '/menu');
-                        }, child: Padding(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              // Solicitar permiso de ubicación
+                              var status = await Permission.location.request();
+                              var status2 = await Permission.camera.request();
+                              if (status.isGranted && status2.isGranted) {
+                                Navigator.pushNamed(context, '/menu');
+                              } else {
+                                print('El usuario denegó el permiso de ubicación o de la camara');
+                                // Aquí podrías mostrar un diálogo o una snackbar para informar al usuario
+                              }
+                            },
+                            child: Padding(
                             padding: const EdgeInsets.all(10),
                             child: Text(
                               'Inicio',
