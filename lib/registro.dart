@@ -200,11 +200,13 @@ class _Registro extends State<Registro> {
               style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(Constantes.blueSky),
                   ),
-               child: Text('Crear Cuenta',
+               child:  Padding(padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
+               child: Text('Crear cuenta',
                style: TextStyle(
                     color: Constantes.backgroundColor,
                     fontSize: 15
-                  ))),
+                  ))) 
+               ),
             ),
             
             Container(

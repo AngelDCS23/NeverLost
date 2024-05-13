@@ -17,6 +17,20 @@ class menu extends StatefulWidget {
 
 class _Menu extends State<menu> {
 
+  String titulo(_bottomNavIndex){
+
+    if(_bottomNavIndex == 0){
+      return 'QR';
+    }else if(_bottomNavIndex == 1){
+      return 'Mapa';
+    }else if(_bottomNavIndex == 2){
+      return 'NeverLost User';
+    }else if(_bottomNavIndex == 3){
+      return 'Ajustes';
+    }
+    return 'NeverLost';
+  }
+
   late Stream<Position> _positionStream;
   String _locationMessage = '';
   Set<Marker> _markers = {};
@@ -53,21 +67,26 @@ class _Menu extends State<menu> {
     }
 
     void _createSquarePolygon() {
-    // Coordenadas del cuadrado
-    List<LatLng> squareCoordinates = [
-      LatLng(37.576838, -4.583353), // Esquina superior izquierda
-      LatLng(36.576726, -6.583389), // Esquina superior derecha
-      LatLng(36.576743, -4.583522), // Esquina inferior derecha
-      LatLng(36.576845, -4.583455), // Esquina inferior izquierda
+
+    List<LatLng> PlantaCentro = [
+      LatLng(36.712803, -4.433091),
+      LatLng(36.712747, -4.433204),
+      LatLng(36.712660, -4.433138),
+      LatLng(36.712612, -4.433229),
+      LatLng(36.713016, -4.433524),
+      LatLng(36.712957, -4.433644),
+      LatLng(36.713186, -4.433818),
+      LatLng(36.713376, -4.433481), //Este punto no se arregla. Es el que está desplazado hacia fuera varios metros, no se que hacer con el.
+      
     ];
 
     // Crear el polígono cuadrado
     Polygon squarePolygon = Polygon(
       polygonId: PolygonId('square'),
-      points: squareCoordinates,
-      strokeWidth: 2,
-      strokeColor: Color.fromARGB(255, 253, 3, 3), // Color del borde del polígono
-      fillColor: const Color.fromARGB(255, 160, 161, 162).withOpacity(1), // Color de relleno del polígono
+      points: PlantaCentro,
+      strokeWidth: 5,
+      strokeColor: Constantes.backgroundColor, // Color del borde del polígono
+      fillColor: Colors.red.withOpacity(1), // Color de relleno del polígono
     );
 
     // Añadir el polígono al conjunto de polígonos
@@ -80,7 +99,7 @@ class _Menu extends State<menu> {
         Completer<GoogleMapController>();
 
     static const CameraPosition _kGooglePlex = CameraPosition(
-      target: LatLng(36.576752, -4.583733),
+      target: LatLng(36.71301067498141, -4.43336209024246),
       zoom: 19.7,
     );
 
@@ -100,7 +119,7 @@ class _Menu extends State<menu> {
     Icons.qr_code,
     Icons.map,
     Icons.card_membership,
-    Icons.expand_circle_down_rounded, //Este último icono se tendría que cambiar por otro que representase la configuración.
+    Icons.settings, 
   ];
 
   var _bottomNavIndex = 0; 
@@ -108,9 +127,14 @@ class _Menu extends State<menu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    // appBar: AppBar(
-    //   title: Text('Prueba'),
-    // ),
+    appBar: AppBar(
+      title: Text(titulo(_bottomNavIndex),
+      style: TextStyle(
+        color: Colors.white
+      ),),
+      backgroundColor: Constantes.backgroundColor,
+      iconTheme: IconThemeData(color: Colors.white),
+    ),
       backgroundColor: Constantes.blueSky,
    body: Container(
     child: Center(
@@ -128,7 +152,7 @@ class _Menu extends State<menu> {
           visible: _bottomNavIndex == 1,
           child: Expanded(
             child: GoogleMap(
-              mapType: MapType.hybrid,
+              mapType: MapType.none,
               initialCameraPosition: _kGooglePlex,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
@@ -151,11 +175,11 @@ class _Menu extends State<menu> {
                     children: <Widget>[
                       Container(
                         // color: Colors.amber,
-                        height: 330,
+                        height: 300,
                         child: Column(
                           // mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Padding(padding: EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+                            Padding(padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                             child: Column(
                               children: [
                                 Container(
@@ -181,13 +205,13 @@ class _Menu extends State<menu> {
                       ),
                       Container(
                         color: Constantes.blue2,
-                        height: 400,
+                        height: 330,
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SizedBox(
-                                height: 200,
+                                height: 260,
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -198,15 +222,19 @@ class _Menu extends State<menu> {
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),),
-                          Text(' Iniciar Sesión',
+                          GestureDetector(
+                            onTap: (){
+                              Navigator.pushNamed(context, '/inicioSesion');
+                            },
+                            child: Text(' Iniciar Sesión',
                           style: GoogleFonts.montserrat(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Constantes.backgroundColor,
                           )),
+                          )
                                 ],
                               )
-                              
                             ],
                           ),
                         ),
@@ -214,10 +242,10 @@ class _Menu extends State<menu> {
                     ],
                 ),
                 Positioned(
-                  top: 240,
+                  top: 220,
                   left: 25,
                   child: Container(       
-                    height: 330,
+                    height: 310,
                     width: 360,
                     decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
@@ -265,11 +293,10 @@ class _Menu extends State<menu> {
                         ],
                       ),
                   )
-                  
                 ),
                 ),
                 Positioned(
-                  top: 545,
+                  top: 505,
                   left: 135,
                   child: ElevatedButton(onPressed: (){
                     Navigator.pushNamed(context, '/registro');
@@ -287,12 +314,62 @@ class _Menu extends State<menu> {
                 )
               )
           ),
-
-
           Visibility(
             visible: _bottomNavIndex == 3,
-            child: 
-            Text('CONFIGURACIÓN')
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                 ListTile(
+                                leading: Icon(Icons.notification_important,
+                                color: Constantes.backgroundColor,
+                                size: 25,),
+                                title: Text('Notificaciones',
+                                  style:  GoogleFonts.montserrat(
+                                    color: Constantes.backgroundColor,
+                                  ),),
+                  ),
+                        ListTile(
+                          leading: Icon(Icons.room,
+                                color: Constantes.backgroundColor,
+                                size: 25,),
+                                title: Text('Ubicación',
+                                  style:  GoogleFonts.montserrat(
+                                    color: Constantes.backgroundColor,
+                                  ),),
+                        ),
+                         ListTile(
+                          leading: Icon(Icons.turned_in,
+                                color: Constantes.backgroundColor,
+                                size: 25,),
+                                title: Text('Idioma',
+                                  style:  GoogleFonts.montserrat(
+                                    color: Constantes.backgroundColor,
+                                  ),),
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.star_rate,
+                                color: Constantes.backgroundColor,
+                                size: 25,),
+                                title: Text('Valora la aplicación',
+                                  style:  GoogleFonts.montserrat(
+                                    color: Constantes.backgroundColor,
+                                  ),),
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.list,
+                                color: Constantes.backgroundColor,
+                                size: 25,),
+                                title: Text('Políticas de privacidad y condiciones de uso',
+                                  style:  GoogleFonts.montserrat(
+                                    color: Constantes.backgroundColor,
+                                  ),),
+                        ),
+                        Container(
+                          height: 400,
+                        )
+              ],
+            )
+            
           )
         ],
       ),
@@ -313,8 +390,8 @@ class _Menu extends State<menu> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedBottomNavigationBar(
           icons: iconList,
-          activeColor: Constantes.blue2,
-          inactiveColor: Constantes.blueSky,
+          activeColor: Constantes.blueSky,
+          inactiveColor: Constantes.blue2,
           height: 70,
           iconSize: 30,
           backgroundColor: Constantes.backgroundColor,
