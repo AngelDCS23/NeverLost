@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neverlost/constants.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+// import 'package:animations/animations.dart';
 
 class menu extends StatefulWidget {
   @override
@@ -32,13 +34,48 @@ class _Menu extends State<menu> {
   }
 
   late Stream<Position> _positionStream;
+  // ignore: unused_field
   String _locationMessage = '';
   Set<Marker> _markers = {};
   Set<Polygon> _polygons = {};
 
+// En teoria esto tendría que nmotificar si tiene los permisos o no. Pero no hace nada jajajaja
+//   Future<AlertDialog> alerta() async{
+//     var status = await Permission.location.status;
+//   if(status.isDenied){
+//     return AlertDialog(
+//       actions: [
+//         TextButton(
+//           onPressed: (){
+//           Navigator.of(context).pop();
+//         },
+//         child: Text('Cerrar'),
+//         )
+//       ],
+//       title: Text('Error en permisos'),
+//       contentPadding: EdgeInsets.all(20),
+//       content: Text('No tienes los permisos de ubicación activados, si quiere utilizar el mapa tendrá que activarlo desde los ajustes de la aplicación'),
+//     );
+//   }
+//   return AlertDialog(
+//       actions: [
+//         TextButton(
+//           onPressed: (){
+//           Navigator.of(context).pop();
+//         },
+//         child: Text('Cerrar'),
+//         )
+//       ],
+//       title: Text('Todo Bien'),
+//       contentPadding: EdgeInsets.all(20),
+//       content: Text('asdasdas'),
+//     );
+//   }
+
     @override
     void initState() {
       super.initState();
+      // alerta();
       _positionStream = Geolocator.getPositionStream(
         locationSettings: AndroidSettings(
           accuracy: LocationAccuracy.high,
@@ -336,6 +373,9 @@ class _Menu extends State<menu> {
                                   style:  GoogleFonts.montserrat(
                                     color: Constantes.backgroundColor,
                                   ),),
+                                  onTap: (){
+                                    Navigator.pushNamed(context, '/ubicacion');
+                                  },
                         ),
                          ListTile(
                           leading: Icon(Icons.turned_in,

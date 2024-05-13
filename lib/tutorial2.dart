@@ -266,7 +266,8 @@ class _tutorial2 extends State<tutorial2> {
                 ),
                 Spacer(),
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ElevatedButton(onPressed: incrementar,
+                child: ElevatedButton(
+                  onPressed: incrementar,
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(colorBotones(selectedPage)),
                 ),

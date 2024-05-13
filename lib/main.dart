@@ -5,6 +5,7 @@ import 'package:neverlost/olvidoContra.dart';
 import 'package:neverlost/tutorial2.dart';
 import 'package:neverlost/menu.dart';
 import 'package:neverlost/registro.dart';
+import 'package:neverlost/ubicacion.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -16,6 +17,7 @@ void main() {
       '/registro':(context) => Registro(),
       '/inicioSesion':(context) => InicioSesion(),
       '/olvidoContra':(context) => OlvidoContra(),
+      '/ubicacion':(context) => Ubicacion(),
     },
   ));
 }
