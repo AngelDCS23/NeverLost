@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _Menu extends State<menu> {
   String titulo(_bottomNavIndex){
 
     if(_bottomNavIndex == 0){
-      return 'QR';
+      return 'Home';
     }else if(_bottomNavIndex == 1){
       return 'Mapa';
     }else if(_bottomNavIndex == 2){
@@ -114,10 +115,8 @@ class _Menu extends State<menu> {
       LatLng(36.712957, -4.433644),
       LatLng(36.713186, -4.433818),
       LatLng(36.713376, -4.433481), //Este punto no se arregla. Es el que está desplazado hacia fuera varios metros, no se que hacer con el.
-      
     ];
 
-    // Crear el polígono cuadrado
     Polygon squarePolygon = Polygon(
       polygonId: PolygonId('square'),
       points: PlantaCentro,
@@ -139,13 +138,6 @@ class _Menu extends State<menu> {
       target: LatLng(36.71301067498141, -4.43336209024246),
       zoom: 19.7,
     );
-
-    // static const CameraPosition _kLake = CameraPosition( //ESTO SE TIENE QUE CAMBIAR EN CASO DE QUE QUIERA QUE EXISTA UNA UBICACIÓN A LA QUE IR
-    //     bearing: 192.8334901395799,
-    //     target: LatLng(37.43296265331129, -122.08832357078792),
-    //     tilt: 59.440717697143555,
-    //     zoom: 19.151926040649414
-    // );
 
     Barcode? result;
     QRViewController? controller;
@@ -173,17 +165,203 @@ class _Menu extends State<menu> {
       iconTheme: IconThemeData(color: Colors.white),
     ),
       backgroundColor: Constantes.blueSky,
-   body: Container(
-    child: Center(
+   body: Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Visibility(
             visible: _bottomNavIndex == 0,
-            child:
-            Expanded(
-                flex: 4,
-                child: _buildQrView(context)), //Llamamos a la función del QR
+              child: Stack(
+                alignment: Alignment.topCenter,
+                  children: [
+                    Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        // color: Colors.amber,
+                        height: 160,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                            child: Column(
+                              children: [
+                                Container(
+                              child: Text('Bienvenido a NeverLost',
+                              textAlign: TextAlign.center,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Constantes.backgroundColor,
+                          ),),
+                            ),
+                            Padding(padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Container(
+                              width: 290,
+                              child: Text('Desde aquí, podrás acceder a todas las ventajas que ofrece la aplicación',
+                            textAlign: TextAlign.center,
+                          style: GoogleFonts.montserrat(
+                           
+                            color: Constantes.backgroundColor,
+                          ),),
+                            ),)
+                            
+                              ],
+                            ),
+                            )
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 590,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 260,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                ),
+                Positioned(
+                  top: 150,
+                  left: 25,
+                  child: Container(       
+                    height: 480,
+                    width: 360,
+                    decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Constantes.backgroundColor,
+                  ),
+                  child: Padding(padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Column(
+                        children: [
+                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(Icons.airplane_ticket,
+                            color: Colors.white,),
+                            Padding(padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: GestureDetector(
+                              onTap: (){
+                                Navigator.pushNamed(context, '/qr');
+                              },
+                              child: Text('Escanear un nuevo billete',
+                              style: GoogleFonts.montserrat(
+                                color: Colors.white,
+                                
+                              )),
+                            ),)
+                          ],
+                         ),
+                         Padding(padding: EdgeInsets.symmetric(vertical: 20),
+                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 116,
+                              width: 360,
+                              color: Constantes.blue2,
+                              child: Padding(padding: EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: <Widget>[
+                                  Column(
+                                    children: <Widget>[
+                                      Padding(padding: EdgeInsets.only(left: 15),
+                                      child: Container(
+                                        width: 240,
+                                        child: Text('Mapa del aeropuerto',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold
+                                        )),
+                                      ),),
+                                      SizedBox(height: 6,),
+                                      Padding(padding: EdgeInsets.only(left: 15),
+                                      child: Container(
+                                        width: 240,
+                                        child: Text('Encuentra los puntos clave del aeropuerto con el mapa interactivo',
+                                        textAlign: TextAlign.start,
+                                        style: GoogleFonts.montserrat(
+                                          color: Colors.white,
+                                          fontSize: 13
+                                        ),),
+                                      ),)
+                                    ],
+                                  ),
+                                  Container(
+                                    width: 90,
+                                    child: Image.asset('assets/herramienta.png',
+                                    scale: 1.7),
+                                  ),
+                                ],
+                              ) 
+                              ) 
+                            ),
+                          ],
+                         ),),
+                        //  SizedBox(
+                        //   height: 60,
+                        //  ),
+                         Padding(padding: EdgeInsets.symmetric(horizontal: 20),
+                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(padding: EdgeInsets.only(top: 40),
+                            child: Container(
+                              width: 320,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10.0),
+                                color: Constantes.blueSky,
+                              ),
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 70,
+                                  ),
+                                  Text('Solicita un Taxi',
+                              style: GoogleFonts.montserrat(
+                                color: Constantes.backgroundColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 19
+                              ),),
+                                ],
+                              )
+                            ),),
+                            
+                          ],
+                         ),),
+                        //  Container(
+                        //   height: 100,
+                        //   color: Colors.amber,
+                        //  )
+                        ],
+                      ),
+                  )
+                ),
+                ),
+                Positioned(
+                  top: 350,
+                  left: (MediaQuery.of(context).size.width - 100) / 2,
+                  child: Container(
+                     width: 100, 
+                      height: 100, 
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Constantes.blueSky, 
+                      ),
+                      child: Image.asset('assets/taxi.png',
+                      scale: 1.7,)
+                  )
+                  ),
+                  ],
+                )
           ),
           Visibility(
           visible: _bottomNavIndex == 1,
@@ -364,6 +542,9 @@ class _Menu extends State<menu> {
                                   style:  GoogleFonts.montserrat(
                                     color: Constantes.backgroundColor,
                                   ),),
+                                  onTap: (){
+                                    Navigator.pushNamed(context, '/notificaciones');
+                                  },
                   ),
                         ListTile(
                           leading: Icon(Icons.room,
@@ -413,7 +594,6 @@ class _Menu extends State<menu> {
           )
         ],
       ),
-    ),
    ),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
