@@ -4,6 +4,7 @@ import 'package:neverlost/inicioSesion.dart';
 import 'package:neverlost/mapa.dart';
 import 'package:neverlost/notificaciones.dart';
 import 'package:neverlost/olvidoContra.dart';
+import 'package:neverlost/prueba_api.dart';
 import 'package:neverlost/qr.dart';
 import 'package:neverlost/solicitaTaxi.dart';
 import 'package:neverlost/tutorial2.dart';
@@ -26,6 +27,7 @@ void main() {
       '/qr':(context) => Qr(),
       '/mapa':(context) => Mapa(),
       '/taxi':(context) => SolicitaTaxi(),
+      '/prueba':(context) => UserPage(),
     },
   ));
 }

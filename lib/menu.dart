@@ -111,7 +111,7 @@ class _Menu extends State<menu> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Container(
-                        height: 250,
+                        height: 200,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -159,7 +159,7 @@ class _Menu extends State<menu> {
                     ],
                 ),
                 Positioned(
-                  top: 250,
+                  top: 200,
                   left: 25,
                   child: Container(       
                     height: 460,
@@ -294,7 +294,7 @@ class _Menu extends State<menu> {
                 ),
                 ),
                 Positioned(
-                  top: 460,
+                  top: 410,
                   left: (MediaQuery.of(context).size.width - 100) / 2,
                   child: Container(
                      width: 100, 
@@ -312,7 +312,9 @@ class _Menu extends State<menu> {
           ),
           Visibility(
           visible: _bottomNavIndex == 1,
-          child: Text('ALGO AQUI'),
+          child: ElevatedButton(onPressed: (){
+            Navigator.pushNamed(context, '/prueba');
+          }, child: Text('Prueba')),
         ),
         
           Visibility(
