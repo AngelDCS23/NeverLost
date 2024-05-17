@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:neverlost/inicio.dart';
 import 'package:neverlost/inicioSesion.dart';
+import 'package:neverlost/mapa.dart';
 import 'package:neverlost/notificaciones.dart';
 import 'package:neverlost/olvidoContra.dart';
 import 'package:neverlost/qr.dart';
+import 'package:neverlost/solicitaTaxi.dart';
 import 'package:neverlost/tutorial2.dart';
 import 'package:neverlost/menu.dart';
 import 'package:neverlost/registro.dart';
@@ -22,6 +24,8 @@ void main() {
       '/ubicacion':(context) => Ubicacion(),
       '/notificaciones':(context) => Notificaciones(),
       '/qr':(context) => Qr(),
+      '/mapa':(context) => Mapa(),
+      '/taxi':(context) => SolicitaTaxi(),
     },
   ));
 }

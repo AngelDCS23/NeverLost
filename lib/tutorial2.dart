@@ -107,7 +107,10 @@ class _tutorial2 extends State<tutorial2> {
   }
 
   void incrementar() {
-  setState(() {
+    if(selectedPage >= 2){
+      Navigator.pushNamed(context, '/menu');
+    }else{
+      setState(() {
     if (selectedPage < pageCount - 1) {
       selectedPage++;
       _pageController.animateToPage(selectedPage,
@@ -115,6 +118,7 @@ class _tutorial2 extends State<tutorial2> {
           curve: Curves.easeInOut);
     }
   });
+    }
 }
 
   @override

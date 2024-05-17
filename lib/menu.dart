@@ -1,22 +1,21 @@
-import 'dart:async';
-import 'dart:ffi';
-import 'dart:math';
+// import 'dart:async';
+// import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neverlost/constants.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'package:qr_code_scanner/qr_code_scanner.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:geolocator/geolocator.dart';
 // import 'package:animations/animations.dart';
 
 class menu extends StatefulWidget {
   @override
   _Menu createState() => _Menu();
 }
-
 
 class _Menu extends State<menu> {
 
@@ -34,11 +33,11 @@ class _Menu extends State<menu> {
     return 'NeverLost';
   }
 
-  late Stream<Position> _positionStream;
-  // ignore: unused_field
-  String _locationMessage = '';
-  Set<Marker> _markers = {};
-  Set<Polygon> _polygons = {};
+  // late Stream<Position> _positionStream;
+  // // ignore: unused_field
+  // String _locationMessage = '';
+  // Set<Marker> _markers = {};
+  // Set<Polygon> _polygons = {};
 
 // En teoria esto tendría que nmotificar si tiene los permisos o no. Pero no hace nada jajajaja
 //   Future<AlertDialog> alerta() async{
@@ -73,79 +72,13 @@ class _Menu extends State<menu> {
 //     );
 //   }
 
-    @override
-    void initState() {
-      super.initState();
-      // alerta();
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: AndroidSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 2, // distancia mínima en metros para que se actualice la ubicación
-        ),
-      );
-      _positionStream.listen((Position position) {
-        setState(() {
-          _locationMessage =
-              'Latitud: ${position.latitude}, Longitud: ${position.longitude}';
-              _markers.clear();
-              _markers.add(
-                Marker(
-                  markerId: MarkerId('current_position'),
-                  position: LatLng(position.latitude, position.longitude),
-                  infoWindow: InfoWindow(
-                    title: 'Mi posición',
-                    snippet:
-                  'Latitud: ${position.latitude}, Longitud: ${position.longitude}',
-                  ),
-                ),
-              );
-        });
-      });
-      _createSquarePolygon();
-    }
-
-    void _createSquarePolygon() {
-
-    List<LatLng> PlantaCentro = [
-      LatLng(36.712803, -4.433091),
-      LatLng(36.712747, -4.433204),
-      LatLng(36.712660, -4.433138),
-      LatLng(36.712612, -4.433229),
-      LatLng(36.713016, -4.433524),
-      LatLng(36.712957, -4.433644),
-      LatLng(36.713186, -4.433818),
-      LatLng(36.713376, -4.433481), //Este punto no se arregla. Es el que está desplazado hacia fuera varios metros, no se que hacer con el.
-    ];
-
-    Polygon squarePolygon = Polygon(
-      polygonId: PolygonId('square'),
-      points: PlantaCentro,
-      strokeWidth: 5,
-      strokeColor: Constantes.backgroundColor, // Color del borde del polígono
-      fillColor: Colors.red.withOpacity(1), // Color de relleno del polígono
-    );
-
-    // Añadir el polígono al conjunto de polígonos
-    setState(() {
-      _polygons.add(squarePolygon);
-    });
-  }
-    
-  final Completer<GoogleMapController> _controller =
-        Completer<GoogleMapController>();
-
-    static const CameraPosition _kGooglePlex = CameraPosition(
-      target: LatLng(36.71301067498141, -4.43336209024246),
-      zoom: 19.7,
-    );
-
-    Barcode? result;
-    QRViewController? controller;
-    final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-    String? ruta_Pantalla;
+    // Barcode? result;
+    // QRViewController? controller;
+    // final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+    // String? ruta_Pantalla;
 
   final iconList = <IconData>[
-    Icons.qr_code,
+    Icons.home,
     Icons.map,
     Icons.card_membership,
     Icons.settings, 
@@ -178,8 +111,7 @@ class _Menu extends State<menu> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Container(
-                        // color: Colors.amber,
-                        height: 160,
+                        height: 250,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -190,22 +122,21 @@ class _Menu extends State<menu> {
                               child: Text('Bienvenido a NeverLost',
                               textAlign: TextAlign.center,
                           style: GoogleFonts.montserrat(
-                            fontSize: 17,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Constantes.backgroundColor,
                           ),),
                             ),
-                            Padding(padding: EdgeInsets.symmetric(vertical: 10),
+                            Padding(padding: EdgeInsets.only(top: 20),
                             child: Container(
-                              width: 290,
+                              width: 350,
                               child: Text('Desde aquí, podrás acceder a todas las ventajas que ofrece la aplicación',
                             textAlign: TextAlign.center,
                           style: GoogleFonts.montserrat(
-                           
+                           fontSize: 16,
                             color: Constantes.backgroundColor,
                           ),),
                             ),)
-                            
                               ],
                             ),
                             )
@@ -213,7 +144,7 @@ class _Menu extends State<menu> {
                         ),
                       ),
                       Container(
-                        height: 590,
+                        height: 500,
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -228,10 +159,10 @@ class _Menu extends State<menu> {
                     ],
                 ),
                 Positioned(
-                  top: 150,
+                  top: 250,
                   left: 25,
                   child: Container(       
-                    height: 480,
+                    height: 460,
                     width: 360,
                     decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.0),
@@ -240,29 +171,39 @@ class _Menu extends State<menu> {
                   child: Padding(padding: EdgeInsets.symmetric(vertical: 20),
                       child: Column(
                         children: [
-                         Row(
+                          Container(
+                            height: 30,
+                            child: GestureDetector(
+                            onTap: (){
+                                Navigator.pushNamed(context, '/qr');
+                              },
+                            child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Icon(Icons.airplane_ticket,
+                            size: 30,
                             color: Colors.white,),
                             Padding(padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: GestureDetector(
-                              onTap: (){
-                                Navigator.pushNamed(context, '/qr');
-                              },
-                              child: Text('Escanear un nuevo billete',
+                            child: Text('Escanear un nuevo billete',
                               style: GoogleFonts.montserrat(
                                 color: Colors.white,
-                                
-                              )),
-                            ),)
-                          ],
-                         ),
+                                fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                          Padding(padding: EdgeInsets.symmetric(vertical: 20),
                          child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
+                            GestureDetector(
+                                    onTap: (){
+                                      Navigator.pushNamed(context, '/mapa');
+                                    },
+                                    child:Container(
                               height: 116,
                               width: 360,
                               color: Constantes.blue2,
@@ -297,25 +238,28 @@ class _Menu extends State<menu> {
                                   Container(
                                     width: 90,
                                     child: Image.asset('assets/herramienta.png',
-                                    scale: 1.7),
+                                    scale: 1.9),
                                   ),
                                 ],
                               ) 
                               ) 
                             ),
+                            ),
                           ],
                          ),),
-                        //  SizedBox(
-                        //   height: 60,
-                        //  ),
                          Padding(padding: EdgeInsets.symmetric(horizontal: 20),
-                         child: Column(
+                         child: GestureDetector(
+                                onTap: (){
+                                  Navigator.pushNamed(context, '/taxi');
+                                },
+                                child: 
+                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Padding(padding: EdgeInsets.only(top: 40),
                             child: Container(
                               width: 320,
-                              height: 150,
+                              height: 160,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10.0),
                                 color: Constantes.blueSky,
@@ -323,7 +267,7 @@ class _Menu extends State<menu> {
                               child: Column(
                                 children: [
                                   SizedBox(
-                                    height: 70,
+                                    height: 60,
                                   ),
                                   Text('Solicita un Taxi',
                               style: GoogleFonts.montserrat(
@@ -331,23 +275,26 @@ class _Menu extends State<menu> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 19
                               ),),
+                              Padding(padding: EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+                              child: Text('Desde aquí podrás llamar para solicitar un taxi que te esté esperando',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.montserrat(
+                              ),),)        
                                 ],
-                              )
-                            ),),
-                            
+                              ),
+                              ),                       
+                            ),
                           ],
-                         ),),
-                        //  Container(
-                        //   height: 100,
-                        //   color: Colors.amber,
-                        //  )
+                         ),
+                         ),
+                         ),
                         ],
                       ),
                   )
                 ),
                 ),
                 Positioned(
-                  top: 350,
+                  top: 460,
                   left: (MediaQuery.of(context).size.width - 100) / 2,
                   child: Container(
                      width: 100, 
@@ -365,17 +312,7 @@ class _Menu extends State<menu> {
           ),
           Visibility(
           visible: _bottomNavIndex == 1,
-          child: Expanded(
-            child: GoogleMap(
-              mapType: MapType.none,
-              initialCameraPosition: _kGooglePlex,
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-              markers: _markers,
-              polygons: _polygons, 
-            ),
-          ),
+          child: Text('ALGO AQUI'),
         ),
         
           Visibility(
@@ -389,10 +326,8 @@ class _Menu extends State<menu> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Container(
-                        // color: Colors.amber,
                         height: 300,
                         child: Column(
-                          // mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Padding(padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                             child: Column(
@@ -590,7 +525,6 @@ class _Menu extends State<menu> {
                         )
               ],
             )
-            
           )
         ],
       ),
@@ -623,58 +557,58 @@ class _Menu extends State<menu> {
     );
   }
 
-  Widget _buildQrView(BuildContext context) {
-    // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
-    var scanArea = (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
-        ? 150.0
-        : 300.0;
-    // To ensure the Scanner view is properly sizes after rotation
-    // we need to listen for Flutter SizeChanged notification and update controller
-    return QRView(
-      key: qrKey,
-      onQRViewCreated: _onQRViewCreated,
-      overlay: QrScannerOverlayShape(
-          borderColor: Colors.white,
-          borderRadius: 10,
-          borderLength: 30,
-          borderWidth: 10,
-          cutOutSize: scanArea),
-      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
-    );
-  }
+//   Widget _buildQrView(BuildContext context) {
+//     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
+//     var scanArea = (MediaQuery.of(context).size.width < 400 ||
+//             MediaQuery.of(context).size.height < 400)
+//         ? 150.0
+//         : 300.0;
+//     // To ensure the Scanner view is properly sizes after rotation
+//     // we need to listen for Flutter SizeChanged notification and update controller
+//     return QRView(
+//       key: qrKey,
+//       onQRViewCreated: _onQRViewCreated,
+//       overlay: QrScannerOverlayShape(
+//           borderColor: Colors.white,
+//           borderRadius: 10,
+//           borderLength: 30,
+//           borderWidth: 10,
+//           cutOutSize: scanArea),
+//       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+//     );
+//   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        result = scanData;
-        ruta_Pantalla = scanData.code;
-        _deQr_aPantalla();
-      });
-    });
-  }
+//   void _onQRViewCreated(QRViewController controller) {
+//     setState(() {
+//       this.controller = controller;
+//     });
+//     controller.scannedDataStream.listen((scanData) {
+//       setState(() {
+//         result = scanData;
+//         ruta_Pantalla = scanData.code;
+//         _deQr_aPantalla();
+//       });
+//     });
+//   }
 
-  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    log('${DateTime.now().toIso8601String()}_onPermissionSet $p' as num);
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
-      );
-    }
-  }
+//   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
+//     log('${DateTime.now().toIso8601String()}_onPermissionSet $p' as num);
+//     if (!p) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('no Permission')),
+//       );
+//     }
+//   }
 
-  void _deQr_aPantalla() {
-    if (ruta_Pantalla != null) {
-      Navigator.pushNamed(context, '$ruta_Pantalla');
-    }
-  }
+//   void _deQr_aPantalla() {
+//     if (ruta_Pantalla != null) {
+//       Navigator.pushNamed(context, '$ruta_Pantalla');
+//     }
+//   }
 
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     controller?.dispose();
+//     super.dispose();
+//   }
 }
