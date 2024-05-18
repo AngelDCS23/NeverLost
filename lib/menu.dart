@@ -279,7 +279,7 @@ class _Menu extends State<menu> {
                               child: Text('Desde aquí podrás llamar para solicitar un taxi que te esté esperando',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
-                              ),),)        
+                              ),),)         
                                 ],
                               ),
                               ),                       

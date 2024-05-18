@@ -15,6 +15,7 @@ class _Registro extends State<Registro> {
   TextEditingController _apellidosController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _contrasenaController = TextEditingController();
+  TextEditingController _repContraController = TextEditingController();
   TextEditingController _telefonoController = TextEditingController();
   // ignore: unused_field
   String _valor = '';
@@ -171,6 +172,7 @@ class _Registro extends State<Registro> {
                 });
               },
               obscureText: true,
+              controller: _repContraController,
               decoration: InputDecoration(
                 labelText: 'Confirmar contraseña *', // Etiqueta del campo de texto
                 border: UnderlineInputBorder(), // Estilo del borde
@@ -209,7 +211,8 @@ class _Registro extends State<Registro> {
             Padding(padding: EdgeInsets.symmetric(vertical: 70),
             child: ElevatedButton(
               onPressed: (){
-                User user = User(
+                if(_repContraController.text == _contrasenaController.text){
+                  User user = User(
                   nombre: _nombreController.text,
                   apellidos: _apellidosController.text,
                   email: _emailController.text,
@@ -231,6 +234,10 @@ class _Registro extends State<Registro> {
                   // Muestra un mensaje de error o toma la acción adecuada
                 });
                 Navigator.pushNamed(context, '/pantallaTutorial');
+                }else{
+                  print('No Coinciden');
+                }
+                
               },
               
               style: ButtonStyle(
