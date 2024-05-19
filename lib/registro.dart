@@ -24,8 +24,6 @@ class _Registro extends State<Registro> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        // shadowColor: Colors.amber,
-        // elevation: 20,
         title: Text('Registro NeverLost User',
         style: GoogleFonts.montserrat(
           fontSize: 17,
@@ -42,7 +40,6 @@ class _Registro extends State<Registro> {
               Padding(padding: EdgeInsets.symmetric(vertical: 20),
               child: Container(
                 width: 350,
-              // color: Colors.amber,
               height: 70,
               child: Column(
                 children: <Widget>[
@@ -60,7 +57,6 @@ class _Registro extends State<Registro> {
               ),
             ),
             Container(
-              // color: Colors.grey,
               height: 50,
               width: 350,
               child: TextField(

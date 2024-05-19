@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:neverlost/constants.dart';
 import 'package:neverlost/models/login.dart';
 import 'package:neverlost/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InicioSesion extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class InicioSesion extends StatefulWidget {
 class _InicioSesionState extends State<InicioSesion> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _contrasenaController = TextEditingController();
+
 
   // ignore: unused_field
   String _valor = '';
@@ -118,9 +120,19 @@ class _InicioSesionState extends State<InicioSesion> {
                     contrasena: _contrasenaController.text,
                   );
 
-                  LoginUser(logUser).then((response) {
+                  LoginUser(logUser).then((response) async {
                     if (response.statusCode == 200 || response.statusCode == 201) {
                       print('Log correcto');
+
+                      SharedPreferences _login = await SharedPreferences.getInstance();
+
+                      await _login.setBool('isLoggedIn', true);
+                      await _login.setString('email', _emailController.text);
+                      final String? email = _login.getString('email');
+                      print(email);
+
+                      await _login.setString('password', _contrasenaController.text);
+
                       Navigator.pushNamed(context, '/menu');
                     } else {
                       print('no ha obtenido respuesta');
