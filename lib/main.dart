@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:neverlost/ar.dart';
+import 'package:neverlost/borrarCuenta.dart';
+import 'package:neverlost/cambiarContrase%C3%B1a.dart';
 import 'package:neverlost/inicio.dart';
 import 'package:neverlost/inicioSesion.dart';
 import 'package:neverlost/mapa.dart';
 import 'package:neverlost/notificaciones.dart';
 import 'package:neverlost/olvidoContra.dart';
+import 'package:neverlost/perfil.dart';
 import 'package:neverlost/prueba_api.dart';
 import 'package:neverlost/qr.dart';
 import 'package:neverlost/solicitaTaxi.dart';
@@ -28,6 +32,10 @@ void main() {
       '/mapa':(context) => Mapa(),
       '/taxi':(context) => SolicitaTaxi(),
       '/prueba':(context) => UserPage(),
+      '/miPerfil':(context) => Perfil(),
+      '/borrarCuenta':(context) => BorrarCuenta(),
+      '/cambiarContraseña':(context) => CambiarContrasena(),
+      '/ar': (context) => Ar(),
     },
   ));
 }

@@ -76,7 +76,11 @@ class _OlvidoContra extends State<OlvidoContra> {
                 Navigator.pushNamed(context, '/envioMail');
               },
               style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Constantes.blueSky),
+                    backgroundColor: WidgetStateProperty.all<Color>(Constantes.blueSky),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0), // Cambia el radio del borde aquí
+                  ),)
                   ),
                child: Padding(padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
                child: Text('Enviar Email',

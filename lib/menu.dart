@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:neverlost/constants.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:http/http.dart';
+import 'package:neverlost/models/usuarios.dart';
+import 'package:neverlost/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:permission_handler/permission_handler.dart';
 // import 'package:qr_code_scanner/qr_code_scanner.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -18,7 +21,26 @@ class menu extends StatefulWidget {
 }
 
 class _Menu extends State<menu> {
+  late Future<User> futureUser;
+  late int _idUsu = 0;
+  bool _isIdLoaded = false;
 
+  Future<void> _ObtenerIdUsu() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _idUsu = prefs.getInt('user_id') ?? 0;
+      _isIdLoaded = true;
+      futureUser = fetchUser(_idUsu); // Llama a la función para obtener el usuario con ID que obtine de la sharedPreference
+    });
+  }
+  
+  bool _log = false;
+
+  Future<void> _Log() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  _log = prefs.getBool('isLoggedIn') ?? false;
+  }
+  
   String titulo(_bottomNavIndex){
 
     if(_bottomNavIndex == 0){
@@ -31,6 +53,12 @@ class _Menu extends State<menu> {
       return 'Ajustes';
     }
     return 'NeverLost';
+  }
+
+  void initState(){
+    super.initState();
+    _ObtenerIdUsu();
+    _Log();
   }
 
   // late Stream<Position> _positionStream;
@@ -86,6 +114,18 @@ class _Menu extends State<menu> {
 
   var _bottomNavIndex = 0; 
 
+  // Función para eliminar las credenciales almacenadas en SharedPreferences
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isLoggedIn');
+    await prefs.remove('email');
+    await prefs.remove('contrasena');
+    setState(() {
+      _log = false; // Actualiza la variable _log para reflejar el cierre de sesión
+    });
+    // Puedes realizar otras acciones aquí, como navegar a la pantalla de inicio de sesión
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +137,7 @@ class _Menu extends State<menu> {
       backgroundColor: Constantes.backgroundColor,
       iconTheme: IconThemeData(color: Colors.white),
     ),
-      backgroundColor: Constantes.blueSky,
+      // backgroundColor: Constantes.blueSky,
    body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -316,11 +356,14 @@ class _Menu extends State<menu> {
             Navigator.pushNamed(context, '/prueba');
           }, child: Text('Prueba')),
         ),
-        
-          Visibility(
-            visible: _bottomNavIndex == 2,
-            child: 
-              Center(
+        Visibility(
+          visible: _bottomNavIndex == 2,
+          child:  Center(
+            child: Column(
+              children: [
+                Visibility(
+                  visible: _log == false,
+                  child:Center(
                 child: 
                 Stack(
                   children: [
@@ -454,8 +497,14 @@ class _Menu extends State<menu> {
                     Navigator.pushNamed(context, '/registro');
                   }, 
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Constantes.blueSky),
+                    backgroundColor: WidgetStateProperty.all<Color>(Constantes.blueSky),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0), // Cambia el radio del borde aquí
                   ),
+                  ),
+                  ),
+                  
                   child: Text('Registrate',
                   style: TextStyle(
                     color: Constantes.backgroundColor,
@@ -464,8 +513,130 @@ class _Menu extends State<menu> {
                   ))
                   ],
                 )
-              )
+              ) ),
+              Visibility(
+                visible: _log == true,
+                child: Center(
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Constantes.blue2,
+                        height: 300,
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          children: <Widget>[
+                            Padding(padding: EdgeInsets.only(top:  60),
+                            child:Column(
+                              children: <Widget>[
+                                Container(
+                              color: Colors.amber,
+                              width: 150,
+                              height: 150,
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            _isIdLoaded
+                            ? FutureBuilder<User>(
+                                future: futureUser,
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return Text('${snapshot.error}');
+                                  } else if (snapshot.hasData) {
+                                    return Text('${snapshot.data!.nombre}',
+                                    style: GoogleFonts.montserrat(
+                                      color: Colors.white,
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                    ),);
+                                  } else {
+                                    return Text('No se encontró el usuario',
+                                    style: GoogleFonts.montserrat(
+                                    color: Colors.white,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                  ),);
+                                  }
+                                },
+                              )
+                            : CircularProgressIndicator(
+                            ),
+                              ],
+                            )
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10),
+                      child: Container(
+                        color: Constantes.backgroundColor,
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          children: <Widget>[
+                            ListTile(
+                              leading: Icon(Icons.airplane_ticket,
+                              color: Colors.white,
+                              size: 30,),
+                              title: Text('Mis Billetes',
+                            style: GoogleFonts.montserrat(
+                              color: Colors.white,
+                              fontSize: 20,
+                            ),),
+                            onTap: () {
+                            Navigator.pushNamed(context, '/misBilletes');
+                            }
+                            ),
+                          ],
+                        ),
+                      ),),
+                      Container(
+                        color: Constantes.backgroundColor,
+                        child: Column(
+                          children: <Widget>[
+                        ListTile(
+                          leading: Icon(Icons.account_circle,
+                          color: Colors.white,
+                          size: 30,),
+                          title: Text('Mi Perfil',
+                              style: GoogleFonts.montserrat(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),),
+                              onTap: (){
+                                Navigator.pushNamed(context, '/miPerfil');
+                              },
+                      ),
+                      ListTile(
+                          leading: Icon(Icons.login_outlined,
+                          color: Colors.white,
+                          size: 30,),
+                          title: Text('Desconectar',
+                              style: GoogleFonts.montserrat(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),),
+                              onTap: (){
+                                _logout();
+                                Navigator.pushNamed(context, '/menu');
+                              },
+                      ),
+
+                          ],
+                        )
+                        
+                      ),
+                      
+                    ],
+                  ),
+                ))
+              ],
+            ),
+          )
+          
           ),
+         
           Visibility(
             visible: _bottomNavIndex == 3,
             child: Column(
@@ -521,6 +692,9 @@ class _Menu extends State<menu> {
                                   style:  GoogleFonts.montserrat(
                                     color: Constantes.backgroundColor,
                                   ),),
+                                  onTap: (){
+                                    Navigator.pushNamed(context, '/miPerfil');
+                                  },
                         ),
                         Container(
                           height: 400,
@@ -533,7 +707,7 @@ class _Menu extends State<menu> {
    ),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
-            //TIENE QUE HACER ALGO.
+            Navigator.pushNamed(context, '/ar');
           },
           backgroundColor: Constantes.backgroundColor,
           child: Icon(

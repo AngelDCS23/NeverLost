@@ -163,7 +163,7 @@ void permisos() async{
           ],
         ),
       ),
-      backgroundColor: Constantes.blueSky,
+      // backgroundColor: Constantes.blueSky,
     );
   }
 }

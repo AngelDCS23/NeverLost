@@ -128,8 +128,6 @@ class _InicioSesionState extends State<InicioSesion> {
 
                       await _login.setBool('isLoggedIn', true);
                       await _login.setString('email', _emailController.text);
-                      final String? email = _login.getString('email');
-                      print(email);
 
                       await _login.setString('password', _contrasenaController.text);
 
@@ -143,6 +141,10 @@ class _InicioSesionState extends State<InicioSesion> {
                 },
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Constantes.blueSky),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0), // Cambia el radio del borde aquí
+                  ),),
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),
