@@ -48,6 +48,9 @@ dependencies:
   http: ^1.2.1
   shared_preferences: ^2.2.3
   o3d: ^3.1.0
+  vector_math: ^2.1.0
+  location: ^6.0.2
+  sensors_plus: ^5.0.1
 
 
 dev_dependencies:

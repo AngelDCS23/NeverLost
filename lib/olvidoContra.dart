@@ -26,6 +26,7 @@ class _OlvidoContra extends State<OlvidoContra> {
         )),
         backgroundColor: Constantes.backgroundColor,
       ),
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

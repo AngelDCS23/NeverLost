@@ -25,7 +25,7 @@ class _BorrarCuenta extends State<BorrarCuenta> {
         ),
         backgroundColor: Constantes.backgroundColor,
       ),
-      // backgroundColor: Constantes.blueSky,
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(

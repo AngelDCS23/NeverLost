@@ -261,8 +261,8 @@ class _Registro extends State<Registro> {
           ),
           )
           ),
-      )
-      
+      ),
+      backgroundColor: Colors.white,
     );
   }
 }

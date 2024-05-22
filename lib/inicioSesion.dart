@@ -33,6 +33,7 @@ class _InicioSesionState extends State<InicioSesion> {
         ),
         backgroundColor: Constantes.backgroundColor,
       ),
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

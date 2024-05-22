@@ -116,7 +116,7 @@ void permisos() async{
           ],
         ),
       ),
-      // backgroundColor: Constantes.blueSky,
+      backgroundColor: Colors.white,
     );
   }
 }
