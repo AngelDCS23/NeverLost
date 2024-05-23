@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:location/location.dart';
 import 'package:o3d/o3d.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 import 'package:vector_math/vector_math.dart' as vector;
 import 'dart:math';
 
@@ -10,57 +10,51 @@ class Ar extends StatefulWidget {
   const Ar({Key? key}) : super(key: key);
 
   @override
-  _Ar createState() => _Ar();
+  _ArState createState() => _ArState();
 }
 
-class _Ar extends State<Ar> {
-  static const Duration _ignoreDuration = Duration(milliseconds: 20);
-  final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  Duration sensorInterval = SensorInterval.normalInterval;
-  GyroscopeEvent? _gyroscopeEvent;
-  DateTime? _gyroscopeUpdateTime;
-  int? _gyroscopeLastInterval;
-
+class _ArState extends State<Ar> {
+  final Location _location = Location();
+  late LatLng targetPosition; // Posición del punto objetivo
+  double currentBearing = 0.0; // Bearing calculado basado en la ubicación
+  double compassHeading = 0.0; // Dirección de la brújula
   O3DController o3dController = O3DController();
-  Location location = Location();
 
-  LatLng targetPosition = LatLng(36.712803, -4.433091); // Posición del punto objetivo
-  double currentHeading = 0.0;
-  LatLng? _lastLocation;
-
-  double yaw = 0.0; // Solo nos interesa la rotación en el eje Y
-
-  double scaleFactor = 20; // Factor de escala para hacer los cambios más evidentes
+  @override
+  void initState() {
+    super.initState();
+    targetPosition = LatLng(36.687416, -4.470552); // Define la posición objetivo
+    _listenLocation();
+  }
 
   void _listenLocation() async {
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
-    _serviceEnabled = await location.serviceEnabled();
+    _serviceEnabled = await _location.serviceEnabled();
     if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
+      _serviceEnabled = await _location.requestService();
       if (!_serviceEnabled) {
         return;
       }
     }
 
-    _permissionGranted = await location.hasPermission();
+    _permissionGranted = await _location.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
+      _permissionGranted = await _location.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
         return;
       }
     }
 
-    location.onLocationChanged.listen((LocationData currentLocation) {
-      if (_lastLocation == null ||
-          _lastLocation!.latitude != currentLocation.latitude ||
-          _lastLocation!.longitude != currentLocation.longitude) {
-        _lastLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        double bearing = calculateBearing(
-            LatLng(currentLocation.latitude!, currentLocation.longitude!),
-            targetPosition);
-        _updateModelOrientation(bearing);
+    _location.onLocationChanged.listen((LocationData currentLocation) {
+      if (currentLocation.latitude != null && currentLocation.longitude != null) {
+        LatLng currentPosition = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+        double bearing = calculateBearing(currentPosition, targetPosition);
+        setState(() {
+          currentBearing = bearing;
+        });
+        _updateModelOrientation();
       }
     });
   }
@@ -77,90 +71,54 @@ class _Ar extends State<Ar> {
     double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
     double bearing = vector.degrees(atan2(y, x));
 
-    print("Cálculo de bearing: lat1=$lat1, lon1=$lon1, lat2=$lat2, lon2=$lon2, dLon=$dLon, y=$y, x=$x, bearing=$bearing");
-
     return (bearing + 360) % 360; // Asegurarse de que el ángulo esté entre 0 y 360
   }
 
-  void _updateModelOrientation(double bearing) {
-    double heading = (bearing - currentHeading + 360) % 360;
-    print("Actualización de orientación del modelo: bearing=$bearing, currentHeading=$currentHeading, heading=$heading");
-    setState(() {
-      currentHeading = heading;
-    });
-    o3dController.cameraOrbit(heading, 90, 0);
+  void _updateModelOrientation() {
+    double adjustedHeading = (currentBearing - compassHeading + 360 - 75) % 360; // Ajusta la orientación del modelo
+    print("****************************************************************$adjustedHeading valor que le llega a la función$currentBearing");
+    if (adjustedHeading > 180) {
+      adjustedHeading -= 360; // Limita a rango [-180, 180]
+    }
+    print("Actualización de orientación del modelo: currentBearing=$currentBearing, compassHeading=$compassHeading, adjustedHeading=$adjustedHeading");
+    o3dController.cameraOrbit(adjustedHeading, 90, 0);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: O3D(
-        src: 'assets/direction_arrow.glb',
-        controller: o3dController,
-        ar: false,
-        autoPlay: true,
-        autoRotate: false,
-        cameraControls: false,
-        cameraTarget: CameraTarget(-0.8, 2, 0.1),
-        cameraOrbit: CameraOrbit(180, 180, 0),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    for (final subscription in _streamSubscriptions) {
-      subscription.cancel();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _listenLocation();
-    _streamSubscriptions.add(
-      gyroscopeEvents.listen(
-        (GyroscopeEvent event) {
-          final now = DateTime.now();
-          if (_gyroscopeUpdateTime != null) {
-            final interval = now.difference(_gyroscopeUpdateTime!);
-            if (interval > _ignoreDuration) {
-              setState(() {
-                _gyroscopeEvent = event;
-                _gyroscopeLastInterval = interval.inMilliseconds;
-
-                // Imprimir los valores del giroscopio
-                print("Giroscopio: x=${event.x}, y=${event.y}, z=${event.z}");
-
-                // Actualizar la orientación del modelo usando solo el eje y (yaw)
-                yaw += event.y * scaleFactor;
-
-                // Imprimir la orientación actual
-                print("Orientación: yaw=$yaw");
-
-                // Actualizar la orientación del modelo 3D
-                o3dController.cameraOrbit(yaw, 90, 0);
-              });
-              _gyroscopeUpdateTime = now;
-            }
-          } else {
-            _gyroscopeUpdateTime = now;
-          }
-        },
-        onError: (e) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return const AlertDialog(
-                title: Text("Sensor Not Found"),
-                content: Text(
-                    "It seems that your device doesn't support Gyroscope Sensor"),
-              );
-            },
-          );
-        },
-        cancelOnError: true,
+      body: Stack(
+        children: [
+          O3D(
+            src: 'assets/direction_arrow.glb',
+            controller: o3dController,
+            ar: false,
+            autoPlay: true,
+            autoRotate: false,
+            cameraControls: false,
+            cameraTarget: CameraTarget(-0.8, 2, 0.1),
+            cameraOrbit: CameraOrbit(180, 180, 0),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 50.0),
+              child: StreamBuilder<CompassEvent>(
+                stream: FlutterCompass.events,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    double heading = snapshot.data!.heading!;
+                    compassHeading = heading; // Actualiza la dirección de la brújula
+                    _updateModelOrientation(); // Actualiza la orientación del modelo 3D
+                    return Text('Brújula: ${heading.toStringAsFixed(2)}°');
+                  } else {
+                    return const Text('Esperando datos de la brújula...');
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
