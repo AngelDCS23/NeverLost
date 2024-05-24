@@ -8,7 +8,10 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:http/http.dart';
 import 'package:neverlost/models/usuarios.dart';
 import 'package:neverlost/services/api_service.dart';
+import 'package:qr_bar_code/code/code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:qr_bar_code/qr_bar_code.dart';
+import 'package:url_launcher/url_launcher.dart';
 // import 'package:permission_handler/permission_handler.dart';
 // import 'package:qr_code_scanner/qr_code_scanner.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,6 +24,7 @@ class menu extends StatefulWidget {
 }
 
 class _Menu extends State<menu> {
+  String textoparaQr = '';
   late Future<User> futureUser;
   late int _idUsu = 0;
   bool _isIdLoaded = false;
@@ -58,6 +62,7 @@ class _Menu extends State<menu> {
   void initState(){
     super.initState();
     _ObtenerIdUsu();
+    obtenerDatosQr();
     _Log();
   }
 
@@ -529,9 +534,10 @@ class _Menu extends State<menu> {
                             child:Column(
                               children: <Widget>[
                                 Container(
-                              color: Colors.amber,
                               width: 150,
                               height: 150,
+                              child: Code(data: "http://$textoparaQr", codeType: CodeType.qrCode(),
+                              color: Colors.white),
                             ),
                             SizedBox(
                               height: 15,
@@ -683,6 +689,9 @@ class _Menu extends State<menu> {
                                   style:  GoogleFonts.montserrat(
                                     color: Constantes.backgroundColor,
                                   ),),
+                                  onTap: (){
+                                    Navigator.pushNamed(context, '/camaraPrueba');
+                                  },
                         ),
                         ListTile(
                           leading: Icon(Icons.list,
@@ -693,7 +702,7 @@ class _Menu extends State<menu> {
                                     color: Constantes.backgroundColor,
                                   ),),
                                   onTap: (){
-                                    Navigator.pushNamed(context, '/camaraPrueba');
+                                    _launchURL(Uri.parse('https://www.google.com'));
                                   },
                         ),
                         Container(
@@ -732,6 +741,26 @@ class _Menu extends State<menu> {
       ),
     );
   }
+
+      Future<void> obtenerDatosQr() async{
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user_data = prefs.getString('user_data') ?? ''; 
+      setState(() {
+      textoparaQr = user_data; 
+    });
+    }
+
+    //TENGO QUE PROBAR QUE ESTO FUNCIONE, PERO PARECE QUE NO ESTÁ DEL TODO BIEN.
+    void _launchURL(Uri url) async {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'No se pudo abrir la URL $url';
+    }
+
+
+  }
+
 
 //   Widget _buildQrView(BuildContext context) {
 //     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.

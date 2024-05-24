@@ -237,7 +237,7 @@ class _Registro extends State<Registro> {
               },
               
               style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Constantes.blueSky),
+                    backgroundColor: WidgetStateProperty.all<Color>(Constantes.blueSky),
                     shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0), // Cambia el radio del borde aquí

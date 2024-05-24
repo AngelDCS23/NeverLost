@@ -61,7 +61,7 @@ class _Mapa extends State<Mapa> {
       LatLng(36.713016, -4.433524),
       LatLng(36.712957, -4.433644),
       LatLng(36.713186, -4.433818),
-      LatLng(36.713376, -4.433481), //Este punto no se arregla. Es el que está desplazado hacia fuera varios metros, no se que hacer con el.
+      LatLng(36.71335, -4.43349), //Este punto no se arregla. Es el que está desplazado hacia fuera varios metros, no se que hacer con el.
     ];
 
     Polygon squarePolygon = Polygon(
@@ -84,6 +84,7 @@ class _Mapa extends State<Mapa> {
     static const CameraPosition _kGooglePlex = CameraPosition(
       target: LatLng(36.71301067498141, -4.43336209024246),
       zoom: 19.7,
+      tilt: 0,
     );
 
   @override
@@ -98,13 +99,14 @@ class _Mapa extends State<Mapa> {
       iconTheme: IconThemeData(color: Colors.white),),
       body: Expanded(
             child: GoogleMap(
-              mapType: MapType.none,
+              mapType: MapType.terrain,
               initialCameraPosition: _kGooglePlex,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
               markers: _markers,
               polygons: _polygons, 
+              
             ),
           ),
     );

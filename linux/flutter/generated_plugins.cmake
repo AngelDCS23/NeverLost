@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  qr_bar_code
   url_launcher_linux
 )
 

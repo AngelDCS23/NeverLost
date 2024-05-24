@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:neverlost/constants.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+// import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neverlost/models/login.dart';
 import 'package:neverlost/services/api_service.dart'; // Importa el servicio para enviar la solicitud de inicio de sesión
@@ -45,8 +45,6 @@ class _inicio extends State<inicio> {
         await prefs.setInt('user_id', idUsu);
         //Almaceno la información del usuario en un Json.
         await prefs.setString('user_data', jsonEncode(responseData));
-        print(idUsu);
-        print('Log exitoso');
       } else {
         print('Error al iniciar sesión: ${response.statusCode}');
       }
