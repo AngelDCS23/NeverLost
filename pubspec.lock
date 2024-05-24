@@ -45,18 +45,18 @@ packages:
     dependency: "direct main"
     description:
       name: camera
-      sha256: "3ad71371b8168a4c8012c0b40a53c05afc75d46cc688b0f37b4611a841d47b25"
+      sha256: cf8ed1789aa244392cfc49d13e97879700476ba641c92500e01f630e109c0f6c
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+1"
-  camera_android:
+    version: "0.11.0"
+  camera_android_camerax:
     dependency: transitive
     description:
-      name: camera_android
-      sha256: "665d62c1f334722c7519ca5d3b94ad68ecaa801691870602da5638a42c1fff67"
+      name: camera_android_camerax
+      sha256: "59967e6d80df9d682a33b86f228cc524e6b52d6184b84f6ac62151dd98bd1ea0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+3"
+    version: "0.6.5+2"
   camera_avfoundation:
     dependency: transitive
     description:
@@ -77,10 +77,10 @@ packages:
     dependency: transitive
     description:
       name: camera_web
-      sha256: "18cdbee5441e9a6fb129fdd9b68a06d1b8c5236932ba97d5faeaefe80db2e5bd"
+      sha256: "9e9aba2fbab77ce2472924196ff8ac4dd8f9126c4f9a3096171cd1d870d6b26c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.1+6"
+    version: "0.3.3"
   characters:
     dependency: transitive
     description:
@@ -624,14 +624,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.1"
   sanitize_html:
     dependency: transitive
     description:

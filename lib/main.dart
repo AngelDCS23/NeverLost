@@ -8,6 +8,7 @@ import 'package:neverlost/mapa.dart';
 import 'package:neverlost/notificaciones.dart';
 import 'package:neverlost/olvidoContra.dart';
 import 'package:neverlost/perfil.dart';
+import 'package:neverlost/pruebaCamara.dart';
 import 'package:neverlost/prueba_api.dart';
 import 'package:neverlost/qr.dart';
 import 'package:neverlost/solicitaTaxi.dart';
@@ -35,7 +36,8 @@ void main() {
       '/miPerfil':(context) => Perfil(),
       '/borrarCuenta':(context) => BorrarCuenta(),
       '/cambiarContraseña':(context) => CambiarContrasena(),
-      '/ar': (context) => Ar(),
+      '/ar': (context) => ArWithCamera(),
+      // '/camaraPrueba': (context) => CameraPreviewWidget(),
     },
   ));
 }

@@ -693,7 +693,7 @@ class _Menu extends State<menu> {
                                     color: Constantes.backgroundColor,
                                   ),),
                                   onTap: (){
-                                    Navigator.pushNamed(context, '/miPerfil');
+                                    Navigator.pushNamed(context, '/camaraPrueba');
                                   },
                         ),
                         Container(
