@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:location/location.dart';
+import 'package:neverlost/constants.dart';
 import 'package:o3d/o3d.dart';
 import 'package:vector_math/vector_math.dart' as vector;
 import 'dart:math';
@@ -114,6 +116,16 @@ class _ArWithCameraState extends State<ArWithCamera> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text('Ar',
+        style: GoogleFonts.montserrat(
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        )),
+        backgroundColor: Constantes.backgroundColor,
+      ),
       body: _cameraController != null && _cameraController.value.isInitialized
           ? Stack(
               children: [

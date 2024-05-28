@@ -701,9 +701,8 @@ class _Menu extends State<menu> {
                                   style:  GoogleFonts.montserrat(
                                     color: Constantes.backgroundColor,
                                   ),),
-                                  onTap: (){
-                                    _launchURL(Uri.parse('https://www.google.com'));
-                                  },
+                                  onTap: () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html')
+
                         ),
                         Container(
                           height: 400,
@@ -749,18 +748,6 @@ class _Menu extends State<menu> {
       textoparaQr = user_data; 
     });
     }
-
-    //TENGO QUE PROBAR QUE ESTO FUNCIONE, PERO PARECE QUE NO ESTÁ DEL TODO BIEN.
-    void _launchURL(Uri url) async {
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      throw 'No se pudo abrir la URL $url';
-    }
-
-
-  }
-
 
 //   Widget _buildQrView(BuildContext context) {
 //     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
