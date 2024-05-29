@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:neverlost/ar.dart';
 import 'package:neverlost/constants.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Qr extends StatefulWidget {
   @override
@@ -16,6 +18,8 @@ class _QrState extends State<Qr> {
   QRViewController? controller;
     final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
     String? ruta_Pantalla;
+    String? coordenadasPunto;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,14 +57,17 @@ class _QrState extends State<Qr> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
+  void _onQRViewCreated(QRViewController controller){
     setState(() {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() {
+      setState(() async {
         result = scanData;
-        ruta_Pantalla = scanData.code;
+        coordenadasPunto = scanData.code; //Tengo que hacer que guarde en la variable las coordenadas obtenidas para luego poder trabajar con ellas en la sección del mapa y de la realidad aumentada.
+        print(coordenadasPunto);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('CoordenadasDestino', coordenadasPunto!);
         _deQr_aPantalla();
       });
     });
@@ -76,8 +83,8 @@ class _QrState extends State<Qr> {
   }
 
   void _deQr_aPantalla() {
-    if (ruta_Pantalla != null) {
-      Navigator.pushNamed(context, '$ruta_Pantalla');
+    if (coordenadasPunto != null) {
+      Navigator.pushNamed(context, '/menu');
     }
   }
 

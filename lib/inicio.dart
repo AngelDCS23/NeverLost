@@ -20,7 +20,7 @@ class _inicio extends State<inicio> {
 
   Future<void> _loadLog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
+    setState(() async {
       _log = prefs.getBool('isLoggedIn') ?? false;
       if (_log) {
         _email = prefs.getString('email') ?? 'Sin mail';
@@ -44,6 +44,7 @@ class _inicio extends State<inicio> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setInt('user_id', idUsu);
         //Almaceno la información del usuario en un Json.
+
         await prefs.setString('user_data', jsonEncode(responseData));
       } else {
         print('Error al iniciar sesión: ${response.statusCode}');
@@ -53,9 +54,15 @@ class _inicio extends State<inicio> {
     }
   }
 
+  Future<void> eliminarCoordenadas() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('CoordenadasDestino');
+  }
+
   @override
   void initState() {
     super.initState();
+    eliminarCoordenadas();
     _loadLog();
     Future.delayed(Duration(seconds: 2), () {
       Navigator.pushNamed(context, '/pantallaTutorial');

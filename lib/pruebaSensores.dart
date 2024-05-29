@@ -1,350 +1,259 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// ignore_for_file: public_member_api_docs
-
-import 'dart:async';
-
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:sensors_plus/sensors_plus.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:maps_toolkit/maps_toolkit.dart' as mp;
 
-import 'snake.dart';
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations(
-    [
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ],
-  );
-
-  runApp(const MyApp());
+class PolylineToPolygonExample extends StatefulWidget {
+  @override
+  _PolylineToPolygonExampleState createState() => _PolylineToPolygonExampleState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _PolylineToPolygonExampleState extends State<PolylineToPolygonExample> {
+  String _locationMessage = "";
+
+  void _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Verifica si el servicio de ubicación está habilitado
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // El servicio de ubicación no está habilitado. No podemos continuar.
+      setState(() {
+        _locationMessage = "El servicio de ubicación está deshabilitado.";
+      });
+      return;
+    }
+
+    // Verifica el permiso de ubicación
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Los permisos están denegados. No podemos continuar.
+        setState(() {
+          _locationMessage = "Permiso de ubicación denegado.";
+        });
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Los permisos están denegados permanentemente. No podemos continuar.
+      setState(() {
+        _locationMessage = "Permiso de ubicación denegado permanentemente.";
+      });
+      return;
+    }
+
+    // Obtiene la ubicación actual
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _locationMessage = "Ubicación: Latitud: ${position.latitude}, Longitud: ${position.longitude}";
+    });
+  }
+
+  GoogleMapController? _controller;
+  Set<Polyline> _polylines = {};
+  Set<Polygon> _polygons = {};
+  LatLng _currentLocation = LatLng(36.7130864, -4.4333294);
+
+  List<mp.LatLng> _pasillo = [
+    mp.LatLng(36.7132634, -4.4334704),
+    mp.LatLng(36.7132413, -4.4335148),
+    mp.LatLng(36.7132804, -4.4335440),
+    mp.LatLng(36.7132864, -4.4335308),
+    mp.LatLng(36.7133060, -4.4335459),
+    mp.LatLng(36.7132991, -4.4335601),
+    mp.LatLng(36.7133191, -4.4335753),
+    mp.LatLng(36.7133107, -4.4335928),
+    mp.LatLng(36.7132911, -4.4335775),
+    mp.LatLng(36.7132830, -4.4335944),
+    mp.LatLng(36.7132782, -4.4335915),
+    mp.LatLng(36.7131954, -4.4337634),
+    mp.LatLng(36.7131845, -4.4337556),
+    mp.LatLng(36.7132671, -4.4335839),
+    mp.LatLng(36.7132030, -4.4335342),
+    mp.LatLng(36.7132324, -4.4334753),
+    mp.LatLng(36.7127942, -4.4331492),
+    mp.LatLng(36.7128051, -4.4331270),
+    mp.LatLng(36.7130593, -4.4333177),
+    mp.LatLng(36.7130726, -4.4332910),
+    mp.LatLng(36.7130885, -4.4333031),
+    mp.LatLng(36.7130995, -4.4332814),
+    mp.LatLng(36.7131250, -4.4333008),
+    mp.LatLng(36.7131007, -4.4333481),
+    mp.LatLng(36.7132478, -4.4334589),
+    mp.LatLng(36.7132543, -4.4334469),
+    mp.LatLng(36.7132896, -4.4334732),
+    mp.LatLng(36.7132840, -4.4334852),
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sensors Demo',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0x9f4376f8),
+  void initState() {
+    super.initState();
+    _setPolygon();
+    _generateRoute();
+  }
+
+  void _setPolygon() {
+    _polygons.add(
+      Polygon(
+        polygonId: PolygonId('Pasillo'),
+        points: _pasillo.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+        strokeWidth: 1,
+        strokeColor: Color.fromARGB(255, 18, 71, 25),
+        fillColor: Color.fromARGB(255, 21, 116, 43).withOpacity(0.5),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, this.title});
+  void _generateRoute() {
+    // Definir un punto de inicio y de destino dentro del polígono
+    mp.LatLng start = mp.LatLng(36.7130864, -4.4333294);
+    mp.LatLng end = mp.LatLng(36.7131926, -4.4337439);
 
-  final String? title;
+    print("Generando ruta desde $start hasta $end");
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+    // Obtener la ruta utilizando el algoritmo A*
+    List<mp.LatLng> route = _aStarAlgorithm(start, end, _pasillo);
 
-class _MyHomePageState extends State<MyHomePage> {
-  static const Duration _ignoreDuration = Duration(milliseconds: 20);
+    // Agregar la ruta como una polyline si es válida
+    if (route.isNotEmpty) {
+      print("Ruta generada con éxito: ${route.length} puntos");
+      setState(() {
+        _polylines.add(
+          Polyline(
+            polylineId: PolylineId('polyline_1'),
+            points: route.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            width: 5,
+            color: Colors.blue,
+          ),
+        );
+      });
+    } else {
+      print("No se pudo generar una ruta válida dentro del polígono.");
+    }
+  }
 
-  static const int _snakeRows = 20;
-  static const int _snakeColumns = 20;
-  static const double _snakeCellSize = 10.0;
+  List<mp.LatLng> _getAdjacentNodes(mp.LatLng node) {
+    double lat = node.latitude;
+    double lng = node.longitude;
+    double step = 0.000002; // Reducir aún más la distancia
 
-  UserAccelerometerEvent? _userAccelerometerEvent;
-  AccelerometerEvent? _accelerometerEvent;
-  GyroscopeEvent? _gyroscopeEvent;
-  MagnetometerEvent? _magnetometerEvent;
+    return [
+      mp.LatLng(lat + step, lng), // Arriba
+      mp.LatLng(lat - step, lng), // Abajo
+      mp.LatLng(lat, lng + step), // Derecha
+      mp.LatLng(lat, lng - step), // Izquierda
+    ];
+  }
 
-  DateTime? _userAccelerometerUpdateTime;
-  DateTime? _accelerometerUpdateTime;
-  DateTime? _gyroscopeUpdateTime;
-  DateTime? _magnetometerUpdateTime;
+  double _calculateDistance(mp.LatLng point1, mp.LatLng point2) {
+    double dx = point1.latitude - point2.latitude;
+    double dy = point1.longitude - point2.longitude;
+    return math.sqrt(dx * dx + dy * dy);
+  }
 
-  int? _userAccelerometerLastInterval;
-  int? _accelerometerLastInterval;
-  int? _gyroscopeLastInterval;
-  int? _magnetometerLastInterval;
-  final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  List<mp.LatLng> _aStarAlgorithm(mp.LatLng start, mp.LatLng end, List<mp.LatLng> polygonPoints) {
+    List<Node> openList = [];
+    List<Node> closedList = [];
 
-  Duration sensorInterval = SensorInterval.normalInterval;
+    openList.add(Node(start, null, 0, _calculateDistance(start, end)));
+
+    while (openList.isNotEmpty) {
+      openList.sort((a, b) => a.f.compareTo(b.f));
+
+      Node currentNode = openList.first;
+      print("Nodo actual: ${currentNode.point}");
+
+      // Verificar si el nodo actual está lo suficientemente cerca del nodo de destino
+      if (_calculateDistance(currentNode.point, end) < 0.0001) {
+        print("Nodo destino alcanzado");
+        return _buildRoute(currentNode);
+      }
+
+      openList.remove(currentNode);
+      closedList.add(currentNode);
+
+      List<mp.LatLng> neighbors = _getAdjacentNodes(currentNode.point);
+
+      for (mp.LatLng neighbor in neighbors) {
+        bool isInside = mp.PolygonUtil.containsLocation(neighbor, polygonPoints, true);
+        print("Verificando vecino $neighbor, está dentro: $isInside");
+
+        if (isInside) {
+          if (!closedList.any((node) => node.point == neighbor)) {
+            double g = currentNode.g + _calculateDistance(currentNode.point, neighbor);
+
+            Node neighborNode = openList.firstWhere((node) => node.point == neighbor, orElse: () => Node(neighbor, null, 0, 0));
+            if (!openList.any((node) => node.point == neighbor) || g < neighborNode.g) {
+              double h = _calculateDistance(neighbor, end);
+              double f = g + h;
+
+              neighborNode.g = g;
+              neighborNode.f = f;
+              neighborNode.parent = currentNode;
+
+              if (!openList.contains(neighborNode)) {
+                openList.add(neighborNode);
+              }
+            }
+          }
+        } else {
+          print("El vecino $neighbor está fuera del polígono");
+        }
+      }
+    }
+
+    return [];
+  }
+
+  List<mp.LatLng> _buildRoute(Node endNode) {
+    List<mp.LatLng> route = [];
+    Node? currentNode = endNode;
+
+    while (currentNode != null) {
+      route.add(currentNode.point);
+      currentNode = currentNode.parent;
+    }
+
+    return route.reversed.toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sensors Plus Example'),
-        elevation: 4,
+        title: Text('Polyline to Polygon Example'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Center(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(width: 1.0, color: Colors.black38),
-              ),
-              child: SizedBox(
-                height: _snakeRows * _snakeCellSize,
-                width: _snakeColumns * _snakeCellSize,
-                child: Snake(
-                  rows: _snakeRows,
-                  columns: _snakeColumns,
-                  cellSize: _snakeCellSize,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Table(
-              columnWidths: const {
-                0: FlexColumnWidth(4),
-                4: FlexColumnWidth(2),
-              },
-              children: [
-                const TableRow(
-                  children: [
-                    SizedBox.shrink(),
-                    Text('X'),
-                    Text('Y'),
-                    Text('Z'),
-                    Text('Interval'),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('UserAccelerometer'),
-                    ),
-                    Text(_userAccelerometerEvent?.x.toStringAsFixed(1) ?? '?'),
-                    Text(_userAccelerometerEvent?.y.toStringAsFixed(1) ?? '?'),
-                    Text(_userAccelerometerEvent?.z.toStringAsFixed(1) ?? '?'),
-                    Text(
-                        '${_userAccelerometerLastInterval?.toString() ?? '?'} ms'),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('Accelerometer'),
-                    ),
-                    Text(_accelerometerEvent?.x.toStringAsFixed(1) ?? '?'),
-                    Text(_accelerometerEvent?.y.toStringAsFixed(1) ?? '?'),
-                    Text(_accelerometerEvent?.z.toStringAsFixed(1) ?? '?'),
-                    Text('${_accelerometerLastInterval?.toString() ?? '?'} ms'),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('Gyroscope'),
-                    ),
-                    Text(_gyroscopeEvent?.x.toStringAsFixed(1) ?? '?'),
-                    Text(_gyroscopeEvent?.y.toStringAsFixed(1) ?? '?'),
-                    Text(_gyroscopeEvent?.z.toStringAsFixed(1) ?? '?'),
-                    Text('${_gyroscopeLastInterval?.toString() ?? '?'} ms'),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('Magnetometer'),
-                    ),
-                    Text(_magnetometerEvent?.x.toStringAsFixed(1) ?? '?'),
-                    Text(_magnetometerEvent?.y.toStringAsFixed(1) ?? '?'),
-                    Text(_magnetometerEvent?.z.toStringAsFixed(1) ?? '?'),
-                    Text('${_magnetometerLastInterval?.toString() ?? '?'} ms'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Update Interval:'),
-              SegmentedButton(
-                segments: [
-                  ButtonSegment(
-                    value: SensorInterval.gameInterval,
-                    label: Text('Game\n'
-                        '(${SensorInterval.gameInterval.inMilliseconds}ms)'),
-                  ),
-                  ButtonSegment(
-                    value: SensorInterval.uiInterval,
-                    label: Text('UI\n'
-                        '(${SensorInterval.uiInterval.inMilliseconds}ms)'),
-                  ),
-                  ButtonSegment(
-                    value: SensorInterval.normalInterval,
-                    label: Text('Normal\n'
-                        '(${SensorInterval.normalInterval.inMilliseconds}ms)'),
-                  ),
-                  const ButtonSegment(
-                    value: Duration(milliseconds: 500),
-                    label: Text('500ms'),
-                  ),
-                  const ButtonSegment(
-                    value: Duration(seconds: 1),
-                    label: Text('1s'),
-                  ),
-                ],
-                selected: {sensorInterval},
-                showSelectedIcon: false,
-                onSelectionChanged: (value) {
-                  setState(() {
-                    sensorInterval = value.first;
-                    userAccelerometerEventStream(
-                        samplingPeriod: sensorInterval);
-                    accelerometerEventStream(samplingPeriod: sensorInterval);
-                    gyroscopeEventStream(samplingPeriod: sensorInterval);
-                    magnetometerEventStream(samplingPeriod: sensorInterval);
-                  });
-                },
-              ),
-            ],
-          ),
-        ],
+      body: GoogleMap(
+        onMapCreated: (GoogleMapController controller) {
+          _controller = controller;
+        },
+        initialCameraPosition: CameraPosition(
+          target: _currentLocation,
+          zoom: 18.0,
+        ),
+        polylines: _polylines,
+        polygons: _polygons,
       ),
     );
   }
+}
 
-  @override
-  void dispose() {
-    super.dispose();
-    for (final subscription in _streamSubscriptions) {
-      subscription.cancel();
-    }
-  }
+class Node {
+  final mp.LatLng point;
+  Node? parent;
+  double g; // Costo desde el punto inicial hasta este nodo
+  double f; // Costo total estimado desde el punto inicial hasta el nodo final a través de este nodo
 
-  @override
-  void initState() {
-    super.initState();
-    _streamSubscriptions.add(
-      userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-        (UserAccelerometerEvent event) {
-          final now = DateTime.now();
-          setState(() {
-            _userAccelerometerEvent = event;
-            if (_userAccelerometerUpdateTime != null) {
-              final interval = now.difference(_userAccelerometerUpdateTime!);
-              if (interval > _ignoreDuration) {
-                _userAccelerometerLastInterval = interval.inMilliseconds;
-              }
-            }
-          });
-          _userAccelerometerUpdateTime = now;
-        },
-        onError: (e) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support User Accelerometer Sensor"),
-                );
-              });
-        },
-        cancelOnError: true,
-      ),
-    );
-    _streamSubscriptions.add(
-      accelerometerEventStream(samplingPeriod: sensorInterval).listen(
-        (AccelerometerEvent event) {
-          final now = DateTime.now();
-          setState(() {
-            _accelerometerEvent = event;
-            if (_accelerometerUpdateTime != null) {
-              final interval = now.difference(_accelerometerUpdateTime!);
-              if (interval > _ignoreDuration) {
-                _accelerometerLastInterval = interval.inMilliseconds;
-              }
-            }
-          });
-          _accelerometerUpdateTime = now;
-        },
-        onError: (e) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support Accelerometer Sensor"),
-                );
-              });
-        },
-        cancelOnError: true,
-      ),
-    );
-    _streamSubscriptions.add(
-      gyroscopeEventStream(samplingPeriod: sensorInterval).listen(
-        (GyroscopeEvent event) {
-          final now = DateTime.now();
-          setState(() {
-            _gyroscopeEvent = event;
-            if (_gyroscopeUpdateTime != null) {
-              final interval = now.difference(_gyroscopeUpdateTime!);
-              if (interval > _ignoreDuration) {
-                _gyroscopeLastInterval = interval.inMilliseconds;
-              }
-            }
-          });
-          _gyroscopeUpdateTime = now;
-        },
-        onError: (e) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support Gyroscope Sensor"),
-                );
-              });
-        },
-        cancelOnError: true,
-      ),
-    );
-    _streamSubscriptions.add(
-      magnetometerEventStream(samplingPeriod: sensorInterval).listen(
-        (MagnetometerEvent event) {
-          final now = DateTime.now();
-          setState(() {
-            _magnetometerEvent = event;
-            if (_magnetometerUpdateTime != null) {
-              final interval = now.difference(_magnetometerUpdateTime!);
-              if (interval > _ignoreDuration) {
-                _magnetometerLastInterval = interval.inMilliseconds;
-              }
-            }
-          });
-          _magnetometerUpdateTime = now;
-        },
-        onError: (e) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support Magnetometer Sensor"),
-                );
-              });
-        },
-        cancelOnError: true,
-      ),
-    );
-  }
+  Node(this.point, this.parent, this.g, this.f);
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: PolylineToPolygonExample(),
+  ));
 }

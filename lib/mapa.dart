@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:neverlost/constants.dart';
+import 'package:maps_toolkit/maps_toolkit.dart' as mp;
+import 'package:neverlost/pruebaSensores.dart';
 
 
 class Mapa extends StatefulWidget {
@@ -19,10 +22,107 @@ class _Mapa extends State<Mapa> {
   String _locationMessage = '';
   Set<Marker> _markers = {};
   Set<Polygon> _polygons = {};
+  Set<Polyline> _polylines = {};
+  // LatLng _currentLocation;
+  mp.LatLng _currentLocation = mp.LatLng(36.7130864, -4.4333294);
+
+  List<mp.LatLng> _getAdjacentNodes(mp.LatLng node) {
+    double lat = node.latitude;
+    double lng = node.longitude;
+    double step = 0.000002; // Reducir aún más la distancia
+
+    return [
+      mp.LatLng(lat + step, lng), // Arriba
+      mp.LatLng(lat - step, lng), // Abajo
+      mp.LatLng(lat, lng + step), // Derecha
+      mp.LatLng(lat, lng - step), // Izquierda
+    ];
+  }
+
+  double _calculateDistance(mp.LatLng point1, mp.LatLng point2) {
+    double dx = point1.latitude - point2.latitude;
+    double dy = point1.longitude - point2.longitude;
+    return math.sqrt(dx * dx + dy * dy);
+  }
+
+  List<mp.LatLng> _aStarAlgorithm(mp.LatLng start, mp.LatLng end, List<mp.LatLng> polygonPoints) {
+    List<Node> openList = [];
+    List<Node> closedList = [];
+
+    openList.add(Node(start, null, 0, _calculateDistance(start, end)));
+
+    while (openList.isNotEmpty) {
+      openList.sort((a, b) => a.f.compareTo(b.f));
+
+      Node currentNode = openList.first;
+      print("Nodo actual: ${currentNode.point}");
+
+      // Verificar si el nodo actual está lo suficientemente cerca del nodo de destino
+      if (_calculateDistance(currentNode.point, end) < 0.0001) {
+        print("Nodo destino alcanzado");
+        return _buildRoute(currentNode);
+      }
+
+      openList.remove(currentNode);
+      closedList.add(currentNode);
+
+      List<mp.LatLng> neighbors = _getAdjacentNodes(currentNode.point);
+
+      for (mp.LatLng neighbor in neighbors) {
+        bool isInside = mp.PolygonUtil.containsLocation(neighbor, polygonPoints, true);
+        print("Verificando vecino $neighbor, está dentro: $isInside");
+
+        if (isInside) {
+          if (!closedList.any((node) => node.point == neighbor)) {
+            double g = currentNode.g + _calculateDistance(currentNode.point, neighbor);
+
+            Node neighborNode = openList.firstWhere((node) => node.point == neighbor, orElse: () => Node(neighbor, null, 0, 0));
+            if (!openList.any((node) => node.point == neighbor) || g < neighborNode.g) {
+              double h = _calculateDistance(neighbor, end);
+              double f = g + h;
+
+              neighborNode.g = g;
+              neighborNode.f = f;
+              neighborNode.parent = currentNode;
+
+              if (!openList.contains(neighborNode)) {
+                openList.add(neighborNode);
+              }
+            }
+          }
+        } else {
+          print("El vecino $neighbor está fuera del polígono");
+        }
+      }
+    }
+
+    return [];
+  }
+
+  List<mp.LatLng> _buildRoute(Node endNode) {
+    List<mp.LatLng> route = [];
+    Node? currentNode = endNode;
+
+    while (currentNode != null) {
+      route.add(currentNode.point);
+      currentNode = currentNode.parent;
+    }
+
+    return route.reversed.toList();
+  }
+
+  Future<void> _determinePosition() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _currentLocation = mp.LatLng(position.latitude, position.longitude);
+      print('*********************************************$_currentLocation**********************************************');
+    });
+  }
   
     @override
     void initState() {
       super.initState();
+      _determinePosition();
       // alerta();
       _positionStream = Geolocator.getPositionStream(
         locationSettings: AndroidSettings(
@@ -49,7 +149,39 @@ class _Mapa extends State<Mapa> {
         });
       });
       _createSquarePolygon();
+       _generateRoute();
     }
+
+    List<mp.LatLng> _pasillo = [
+    mp.LatLng(36.7132634, -4.4334704),
+    mp.LatLng(36.7132413, -4.4335148),
+    mp.LatLng(36.7132804, -4.4335440),
+    mp.LatLng(36.7132864, -4.4335308),
+    mp.LatLng(36.7133060, -4.4335459),
+    mp.LatLng(36.7132991, -4.4335601),
+    mp.LatLng(36.7133191, -4.4335753),
+    mp.LatLng(36.7133107, -4.4335928),
+    mp.LatLng(36.7132911, -4.4335775),
+    mp.LatLng(36.7132830, -4.4335944),
+    mp.LatLng(36.7132782, -4.4335915),
+    mp.LatLng(36.7131954, -4.4337634),
+    mp.LatLng(36.7131845, -4.4337556),
+    mp.LatLng(36.7132671, -4.4335839),
+    mp.LatLng(36.7132030, -4.4335342),
+    mp.LatLng(36.7132324, -4.4334753),
+    mp.LatLng(36.7127942, -4.4331492),
+    mp.LatLng(36.7128051, -4.4331270),
+    mp.LatLng(36.7130593, -4.4333177),
+    mp.LatLng(36.7130726, -4.4332910),
+    mp.LatLng(36.7130885, -4.4333031),
+    mp.LatLng(36.7130995, -4.4332814),
+    mp.LatLng(36.7131250, -4.4333008),
+    mp.LatLng(36.7131007, -4.4333481),
+    mp.LatLng(36.7132478, -4.4334589),
+    mp.LatLng(36.7132543, -4.4334469),
+    mp.LatLng(36.7132896, -4.4334732),
+    mp.LatLng(36.7132840, -4.4334852),
+  ];
 
     void _createSquarePolygon() {
 
@@ -82,44 +214,44 @@ class _Mapa extends State<Mapa> {
       fillColor: Color.fromARGB(255, 51, 161, 240).withOpacity(0.5), // Color de relleno del polígono
     );
 
-    List<LatLng> pasillo = [
+    List<mp.LatLng> _pasillo = [
       
-      LatLng(36.7132634, -4.4334704), //Creo que esta es la esquina (izquierda abajo) de las escaleras
-      LatLng(36.7132413, -4.4335148),//Aqui está el punto de las escaleras (izquierda arriba)
-      LatLng(36.7132804, -4.4335440), //Aqui está el punto de las escaleras (derecha arriba)
-      LatLng(36.7132864, -4.4335308), //Ascensor (derecha arriba)
-      LatLng(36.7133060, -4.4335459), //Ascensor (isquierda arriba)
-      LatLng(36.7132991, -4.4335601), //Aseo Hombres
-      LatLng(36.7133191, -4.4335753), //Aseso Adaptados (izquierda abajo)
-      LatLng(36.7133107, -4.4335928), //Sala limpieza (derecha abajo)
-      LatLng(36.7132911, -4.4335775), //Sala Limpieza (izquierda abajo)
-      LatLng(36.7132830, -4.4335944), //Sala Limpieza (izquierda arriba)
-      LatLng(36.7132782, -4.4335915), //Aula5 (izquierda abajo)
-      LatLng(36.7131954, -4.4337634), //"biblioteca" (izquierda arriba)
-      LatLng(36.7131845, -4.4337556), //Aula4 (izquierda abajo)
-      LatLng(36.7132671, -4.4335839), //Planta centro, (esquina de pasillo dirección sala profesores)
-      LatLng(36.7132030, -4.4335342), //Planta Centro (esquina directa a poligono escaleras)
-      LatLng(36.7132324, -4.4334753), //Planra centro, (esquina pasillo dirección recepción)
+      mp.LatLng(36.7132634, -4.4334704), //Creo que esta es la esquina (izquierda abajo) de las escaleras
+      mp.LatLng(36.7132413, -4.4335148),//Aqui está el punto de las escaleras (izquierda arriba)
+      mp.LatLng(36.7132804, -4.4335440), //Aqui está el punto de las escaleras (derecha arriba)
+      mp.LatLng(36.7132864, -4.4335308), //Ascensor (derecha arriba)
+      mp.LatLng(36.7133060, -4.4335459), //Ascensor (isquierda arriba)
+      mp.LatLng(36.7132991, -4.4335601), //Aseo Hombres
+      mp.LatLng(36.7133191, -4.4335753), //Aseso Adaptados (izquierda abajo)
+      mp.LatLng(36.7133107, -4.4335928), //Sala limpieza (derecha abajo)
+      mp.LatLng(36.7132911, -4.4335775), //Sala Limpieza (izquierda abajo)
+      mp.LatLng(36.7132830, -4.4335944), //Sala Limpieza (izquierda arriba)
+      mp.LatLng(36.7132782, -4.4335915), //Aula5 (izquierda abajo)
+      mp.LatLng(36.7131954, -4.4337634), //"biblioteca" (izquierda arriba)
+      mp.LatLng(36.7131845, -4.4337556), //Aula4 (izquierda abajo)
+      mp.LatLng(36.7132671, -4.4335839), //Planta centro, (esquina de pasillo dirección sala profesores)
+      mp.LatLng(36.7132030, -4.4335342), //Planta Centro (esquina directa a poligono escaleras)
+      mp.LatLng(36.7132324, -4.4334753), //Planra centro, (esquina pasillo dirección recepción)
 
-      LatLng(36.7127942, -4.4331492),
-      LatLng(36.7128051, -4.4331270),
+      mp.LatLng(36.7127942, -4.4331492),
+      mp.LatLng(36.7128051, -4.4331270),
 
-      LatLng(36.7130593, -4.4333177),
-      LatLng(36.7130726, -4.4332910),
-      LatLng(36.7130885, -4.4333031),
-      LatLng(36.7130995, -4.4332814),
-      LatLng(36.7131250, -4.4333008),
-      LatLng(36.7131007, -4.4333481),
+      mp.LatLng(36.7130593, -4.4333177),
+      mp.LatLng(36.7130726, -4.4332910),
+      mp.LatLng(36.7130885, -4.4333031),
+      mp.LatLng(36.7130995, -4.4332814),
+      mp.LatLng(36.7131250, -4.4333008),
+      mp.LatLng(36.7131007, -4.4333481),
       
-      LatLng(36.7132478, -4.4334589),
-      LatLng(36.7132543, -4.4334469),
-      LatLng(36.7132896, -4.4334732),
-      LatLng(36.7132840, -4.4334852),
+      mp.LatLng(36.7132478, -4.4334589),
+      mp.LatLng(36.7132543, -4.4334469),
+      mp.LatLng(36.7132896, -4.4334732),
+      mp.LatLng(36.7132840, -4.4334852),
     ];
 
     Polygon PoligonoPasillo = Polygon(
       polygonId: PolygonId('Pasillo'),
-      points: pasillo,
+      points: _pasillo.map((point) => LatLng(point.latitude, point.longitude)).toList(),
       strokeWidth: 1,
       strokeColor: Color.fromARGB(255, 18, 71, 25), // Color del borde del polígono
       fillColor: Color.fromARGB(255, 21, 116, 43).withOpacity(0.5),
@@ -424,7 +556,7 @@ class _Mapa extends State<Mapa> {
       LatLng(36.7133024, -4.4334996),
       LatLng(36.7132804, -4.4335440),
       LatLng(36.7132413, -4.4335148),
-            LatLng(36.7132634, -4.4334704),
+      LatLng(36.7132634, -4.4334704),
 
     ];
 
@@ -465,6 +597,34 @@ class _Mapa extends State<Mapa> {
       
     });
   }
+
+  void _generateRoute() {
+    // Definir un punto de inicio y de destino dentro del polígono
+    mp.LatLng start = _currentLocation;
+    mp.LatLng end = mp.LatLng(36.7131926, -4.4337439);
+
+    print("Generando ruta desde $start hasta $end");
+
+    // Obtener la ruta utilizando el algoritmo A*
+    List<mp.LatLng> route = _aStarAlgorithm(start, end, _pasillo);
+    
+    // AgregaColor.fromARGB(255, 116, 87, 87)s válida
+    if (route.isNotEmpty) {
+      print("Ruta generada con éxito: ${route.length} puntos");
+      setState(() {
+        _polylines.add(
+          Polyline(
+            polylineId: PolylineId('polyline_1'),
+            points: route.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            width: 5,
+            color: Colors.blue,
+          ),
+        );
+      });
+    } else {
+      print("No se pudo generar una ruta válida dentro del polígono.");
+    }
+  }
     
   final Completer<GoogleMapController> _controller =
         Completer<GoogleMapController>();
@@ -485,21 +645,24 @@ class _Mapa extends State<Mapa> {
       ),),
       backgroundColor: Constantes.backgroundColor,
       iconTheme: IconThemeData(color: Colors.white),),
-      body: Expanded(
-            child: GoogleMap(
+      body: _currentLocation == null
+            ? Center(child: CircularProgressIndicator(),)
+            : GoogleMap(
               mapType: MapType.hybrid,
               initialCameraPosition: _kGooglePlex,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
               markers: _markers,
-              polygons: _polygons, 
-              buildingsEnabled: false,
-              zoomControlsEnabled: false,
-              zoomGesturesEnabled: false,
-              trafficEnabled: false, 
+              polygons: _polygons,
+              polylines: _polylines, 
+              // buildingsEnabled: false,
+              // zoomControlsEnabled: false,
+              // zoomGesturesEnabled: false,
+              // trafficEnabled: false, 
+              //Tendria que hacer que pudiera guardar las coodenadas del marcador que el usuario pinche para luego poder generar la flecha en esa dirección y la ruta
             ),
-          ),
+          
     );
   }
 }

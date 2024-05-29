@@ -10,7 +10,6 @@ import 'package:neverlost/models/usuarios.dart';
 import 'package:neverlost/services/api_service.dart';
 import 'package:qr_bar_code/code/code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:qr_bar_code/qr_bar_code.dart';
 import 'package:url_launcher/url_launcher.dart';
 // import 'package:permission_handler/permission_handler.dart';
 // import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -28,6 +27,8 @@ class _Menu extends State<menu> {
   late Future<User> futureUser;
   late int _idUsu = 0;
   bool _isIdLoaded = false;
+  bool pruebaAlerta = false;
+  String? coordenadasDestino;
 
   Future<void> _ObtenerIdUsu() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -61,6 +62,7 @@ class _Menu extends State<menu> {
 
   void initState(){
     super.initState();
+    ObtenerCoordenadas();
     _ObtenerIdUsu();
     obtenerDatosQr();
     _Log();
@@ -245,51 +247,92 @@ class _Menu extends State<menu> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             GestureDetector(
-                                    onTap: (){
-                                      Navigator.pushNamed(context, '/mapa');
-                                    },
-                                    child:Container(
-                              height: 116,
-                              width: 360,
-                              color: Constantes.blue2,
-                              child: Padding(padding: EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                children: <Widget>[
-                                  Column(
-                                    children: <Widget>[
-                                      Padding(padding: EdgeInsets.only(left: 15),
-                                      child: Container(
-                                        width: 240,
-                                        child: Text('Mapa del aeropuerto',
+                          onTap: () {
+                            if (coordenadasDestino != null) {
+                              Navigator.pushNamed(context, '/mapa');
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Advertencia', 
+                                    style: GoogleFonts.montserrat(),
+                                    ),
+                                    content: Text('Escanea el billete antes de ver el mapa',
+                                    style: GoogleFonts.montserrat(),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text('OK',
                                         style: GoogleFonts.montserrat(
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold
-                                        )),
-                                      ),),
-                                      SizedBox(height: 6,),
-                                      Padding(padding: EdgeInsets.only(left: 15),
-                                      child: Container(
-                                        width: 240,
-                                        child: Text('Encuentra los puntos clave del aeropuerto con el mapa interactivo',
-                                        textAlign: TextAlign.start,
-                                        style: GoogleFonts.montserrat(
-                                          color: Colors.white,
-                                          fontSize: 13
-                                        ),),
-                                      ),)
+                                          color: Constantes.backgroundColor
+                                        ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
                                     ],
-                                  ),
-                                  Container(
-                                    width: 90,
-                                    child: Image.asset('assets/herramienta.png',
-                                    scale: 1.9),
-                                  ),
-                                ],
-                              ) 
-                              ) 
+                                  );
+                                },
+                              );
+                            }
+                          },
+          child: Container(
+            height: 116,
+            width: 360,
+            color: Constantes.blue2, // Cambia esto por Constantes.blue2
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(left: 15),
+                        child: Container(
+                          width: 240,
+                          child: Text(
+                            'Mapa del aeropuerto',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 15,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      Padding(
+                        padding: EdgeInsets.only(left: 15),
+                        child: Container(
+                          width: 240,
+                          child: Text(
+                            'Encuentra los puntos clave del aeropuerto con el mapa interactivo',
+                            textAlign: TextAlign.start,
+                            style: GoogleFonts.montserrat(
+                              color: Colors.white,
+                              fontSize: 13,
                             ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    width: 90,
+                    child: Image.asset(
+                      'assets/herramienta.png',
+                      scale: 1.9,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+  
+    ),
                           ],
                          ),),
                          Padding(padding: EdgeInsets.symmetric(horizontal: 20),
@@ -715,7 +758,35 @@ class _Menu extends State<menu> {
    ),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/ar');
+                            if (coordenadasDestino != null) {
+                              Navigator.pushNamed(context, '/ar');
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Advertencia', 
+                                    style: GoogleFonts.montserrat(),
+                                    ),
+                                    content: Text('Escanea el billete antes poder utilizar la realidad aumentada',
+                                    style: GoogleFonts.montserrat(),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text('OK',
+                                        style: GoogleFonts.montserrat(
+                                          color: Constantes.backgroundColor
+                                        ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                          }
           },
           backgroundColor: Constantes.backgroundColor,
           child: Icon(
@@ -739,6 +810,12 @@ class _Menu extends State<menu> {
           onTap: (index) => setState(() => _bottomNavIndex = index),
       ),
     );
+  }
+
+  void ObtenerCoordenadas() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    coordenadasDestino =  prefs.getString('CoordenadasDestino')!;
+    print('assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss$coordenadasDestino');
   }
 
       Future<void> obtenerDatosQr() async{
