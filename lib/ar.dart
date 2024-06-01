@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:location/location.dart';
 import 'package:neverlost/constants.dart';
 import 'package:o3d/o3d.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vector_math/vector_math.dart' as vector;
 import 'dart:math';
 import 'package:camera/camera.dart';
@@ -24,11 +25,21 @@ class _ArWithCameraState extends State<ArWithCamera> {
   O3DController o3dController = O3DController();
   late CameraController _cameraController;
   late Future<void> _initializeCameraControllerFuture;
+  String? intermedio;
+  LatLng? destino;
+
+  Future<void> obtenerCoordenadasShared() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    intermedio = await prefs.getString('CoordenadasDestino');
+    print('aquiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:$intermedio');
+    destino = intermedio as LatLng;
+  }
 
   @override
   void initState() {
     super.initState();
-    targetPosition = LatLng(36.692799, -4.482717); // Define la posición objetivo
+    obtenerCoordenadasShared();
+    targetPosition = LatLng(36.692799, -4.482717);
     _initializeCamera();
     _listenLocation();
   }
@@ -46,7 +57,9 @@ class _ArWithCameraState extends State<ArWithCamera> {
       );
       _initializeCameraControllerFuture = _cameraController.initialize();
       await _initializeCameraControllerFuture; // Espera a que se inicialice el controlador
-      setState(() {}); // Reconstruye el widget con la vista previa de la cámara
+      setState(() {
+
+      }); // Reconstruye el widget con la vista previa de la cámara
     } catch (e) {
       print('Error al inicializar la cámara: $e');
     }
@@ -75,7 +88,7 @@ class _ArWithCameraState extends State<ArWithCamera> {
     _location.onLocationChanged.listen((LocationData currentLocation) {
       if (currentLocation.latitude != null && currentLocation.longitude != null) {
         LatLng currentPosition = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        double bearing = calculateBearing(currentPosition, targetPosition);
+        double bearing = calculateBearing(currentPosition, destino!);
         setState(() {
           currentBearing = bearing;
         });
@@ -96,20 +109,20 @@ class _ArWithCameraState extends State<ArWithCamera> {
     double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
     double bearing = vector.degrees(atan2(y, x));
 
-    return (bearing + 360) % 360; // Asegurarse de que el ángulo esté entre 0 y 360
+    return (bearing + 360) % 360;
   }
 
   void _updateModelOrientation() {
-    double adjustedHeading = (currentBearing - compassHeading + 360 - 75) % 360; // Ajusta la orientación del modelo
+    double adjustedHeading = (currentBearing - compassHeading + 360 + 75) % 360; // Ajustar la orientación del modelo
     if (adjustedHeading > 180) {
-      adjustedHeading -= 360; // Limita a rango [-180, 180]
+      adjustedHeading -= 360; // Limitar el rango (-180, 180)
     }
     o3dController.cameraOrbit(adjustedHeading, 90, 0);
   }
 
   @override
   void dispose() {
-    _cameraController.dispose(); // Libera el controlador de la cámara
+    _cameraController.dispose();
     super.dispose();
   }
 
@@ -154,8 +167,8 @@ class _ArWithCameraState extends State<ArWithCamera> {
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           double heading = snapshot.data!.heading!;
-                          compassHeading = heading; // Actualiza la dirección de la brújula
-                          _updateModelOrientation(); // Actualiza la orientación del modelo 3D
+                          compassHeading = heading; // cambiar la dirección de la brújula
+                          _updateModelOrientation(); // cambiar la orientación del modelo 3D
                           return Text('Brújula: ${heading.toStringAsFixed(2)}°');
                         } else {
                           return const Text('Esperando datos de la brújula...');
