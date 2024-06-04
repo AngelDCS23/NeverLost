@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _Mapa extends State<Mapa> {
   Set<Polygon> _polygons = {};
   Set<Polyline> _polylines = {};
   // LatLng _currentLocation;
-  mp.LatLng _currentLocation = mp.LatLng(36.7130864, -4.4333294);
+  mp.LatLng _currentLocation = mp.LatLng(36.7128249, -4.4331573);
 
   List<mp.LatLng> _getAdjacentNodes(mp.LatLng node) {
     double lat = node.latitude;
@@ -55,7 +56,7 @@ class _Mapa extends State<Mapa> {
       openList.sort((a, b) => a.f.compareTo(b.f));
 
       Node currentNode = openList.first;
-      print("Nodo actual: ${currentNode.point}");
+      // print("Nodo actual: ${currentNode.point}");
 
       // Verificar si el nodo actual está lo suficientemente cerca del nodo de destino
       if (_calculateDistance(currentNode.point, end) < 0.0001) {
@@ -70,7 +71,7 @@ class _Mapa extends State<Mapa> {
 
       for (mp.LatLng neighbor in neighbors) {
         bool isInside = mp.PolygonUtil.containsLocation(neighbor, polygonPoints, true);
-        print("Verificando vecino $neighbor, está dentro: $isInside");
+        // print("Verificando vecino $neighbor, está dentro: $isInside");
 
         if (isInside) {
           if (!closedList.any((node) => node.point == neighbor)) {
@@ -91,7 +92,7 @@ class _Mapa extends State<Mapa> {
             }
           }
         } else {
-          print("El vecino $neighbor está fuera del polígono");
+          // print("El vecino $neighbor está fuera del polígono");
         }
       }
     }
@@ -113,6 +114,8 @@ class _Mapa extends State<Mapa> {
 
   Future<void> _determinePosition() async {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    double altura = position.altitude;
+    print('alturaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa $altura'); //Obtengo la altura para determinar la planta que tiene que mostrar el mapa. Aún se tiene que crear la función encargada de devolver un conjunto de polígonos simulando la planta en cuestión (Esta tiene que ser en teoria la parta mas facil de todas, en teoria jajaajajajaj),
     setState(() {
       _currentLocation = mp.LatLng(position.latitude, position.longitude);
       print('*********************************************$_currentLocation**********************************************');
@@ -601,7 +604,7 @@ class _Mapa extends State<Mapa> {
   void _generateRoute() {
     // Definir un punto de inicio y de destino dentro del polígono
     mp.LatLng start = _currentLocation;
-    mp.LatLng end = mp.LatLng(36.7131926, -4.4337439);
+    mp.LatLng end = mp.LatLng(36.7132919, -4.4335458); //Lugar de destino
 
     print("Generando ruta desde $start hasta $end");
 
