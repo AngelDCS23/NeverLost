@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:neverlost/constants.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mp;
 import 'package:neverlost/pruebaSensores.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class Mapa extends StatefulWidget {
@@ -26,6 +27,19 @@ class _Mapa extends State<Mapa> {
   Set<Polyline> _polylines = {};
   // LatLng _currentLocation;
   mp.LatLng _currentLocation = mp.LatLng(36.7128249, -4.4331573);
+  String? intermedio;
+  mp.LatLng destino = mp.LatLng(36.7128390, -4.4330591);
+
+  Future<void> obtenerCoordenadasShared() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    intermedio = prefs.getString('CoordenadasDestino');
+    if (intermedio != null) {
+      final coords = intermedio!.split(',');
+      double lat = double.parse(coords[0]);
+      double lon = double.parse(coords[1]);
+      destino = mp.LatLng(lat, lon);
+    }
+  }
 
   List<mp.LatLng> _getAdjacentNodes(mp.LatLng node) {
     double lat = node.latitude;
@@ -126,6 +140,7 @@ class _Mapa extends State<Mapa> {
     void initState() {
       super.initState();
       _determinePosition();
+      obtenerCoordenadasShared();
       // alerta();
       _positionStream = Geolocator.getPositionStream(
         locationSettings: AndroidSettings(
@@ -604,7 +619,7 @@ class _Mapa extends State<Mapa> {
   void _generateRoute() {
     // Definir un punto de inicio y de destino dentro del polígono
     mp.LatLng start = _currentLocation;
-    mp.LatLng end = mp.LatLng(36.7132919, -4.4335458); //Lugar de destino
+    mp.LatLng end = destino; //Lugar de destino
 
     print("Generando ruta desde $start hasta $end");
 

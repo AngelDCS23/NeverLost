@@ -19,41 +19,29 @@ class ArWithCamera extends StatefulWidget {
 
 class _ArWithCameraState extends State<ArWithCamera> {
   final Location _location = Location();
-  late LatLng targetPosition;
-  double currentBearing = 0.0;
-  double compassHeading = 0.0;
+  late LatLng targetPosition; // Posición del punto objetivo
+  double currentBearing = 0.0; // Bearing calculado basado en la ubicación
+  double compassHeading = 0.0; // Dirección de la brújula
   O3DController o3dController = O3DController();
   late CameraController _cameraController;
   late Future<void> _initializeCameraControllerFuture;
   String? intermedio;
   LatLng destino = LatLng(36.7128390, -4.4330591);
-  bool _isCameraInitialized = false;
-  StreamSubscription<CompassEvent>? _compassSubscription;
-
+  
   Future<void> obtenerCoordenadasShared() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    intermedio = prefs.getString('CoordenadasDestino');
-    if (intermedio != null) {
-      final coords = intermedio!.split(',');
-      double lat = double.parse(coords[0]);
-      double lon = double.parse(coords[1]);
-      destino = LatLng(lat, lon);
-    }
+    intermedio = await prefs.getString('CoordenadasDestino');
+    print('aquiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:$intermedio');
+    destino = intermedio as LatLng;
   }
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
-    obtenerCoordenadasShared().then((_) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          targetPosition = destino;
-        });
-        _listenLocation();
-        _listenCompass();
-      });
-    });
+    obtenerCoordenadasShared();
+    targetPosition = destino;
+    _listenLocation();
   }
 
   Future<void> _initializeCamera() async {
@@ -68,10 +56,10 @@ class _ArWithCameraState extends State<ArWithCamera> {
         ResolutionPreset.max,
       );
       _initializeCameraControllerFuture = _cameraController.initialize();
-      await _initializeCameraControllerFuture;
+      await _initializeCameraControllerFuture; // Espera a que se inicialice el controlador
       setState(() {
-        _isCameraInitialized = true;
-      });
+
+      }); // Reconstruye el widget con la vista previa de la cámara
     } catch (e) {
       print('Error al inicializar la cámara: $e');
     }
@@ -100,20 +88,9 @@ class _ArWithCameraState extends State<ArWithCamera> {
     _location.onLocationChanged.listen((LocationData currentLocation) {
       if (currentLocation.latitude != null && currentLocation.longitude != null) {
         LatLng currentPosition = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        double bearing = calculateBearing(currentPosition, destino);
+        double bearing = calculateBearing(currentPosition, destino!);
         setState(() {
           currentBearing = bearing;
-        });
-        _updateModelOrientation();
-      }
-    });
-  }
-
-  void _listenCompass() {
-    _compassSubscription = FlutterCompass.events!.listen((CompassEvent event) {
-      if (mounted) {
-        setState(() {
-          compassHeading = event.heading!;
         });
         _updateModelOrientation();
       }
@@ -136,19 +113,15 @@ class _ArWithCameraState extends State<ArWithCamera> {
   }
 
   void _updateModelOrientation() {
-    double adjustedHeading = (currentBearing - compassHeading + 360 -90) % 360; //Compensación de la "ruta"
+    double adjustedHeading = (currentBearing - compassHeading + 360 + 75) % 360; // Ajustar la orientación del modelo
     if (adjustedHeading > 180) {
-      adjustedHeading -= 360;
+      adjustedHeading -= 360; // Limitar el rango (-180, 180)
     }
-    print('currentBearing: $currentBearing');
-    print('compassHeading: $compassHeading');
-    print('adjustedHeading: $adjustedHeading');
     o3dController.cameraOrbit(adjustedHeading, 90, 0);
   }
 
   @override
   void dispose() {
-    _compassSubscription?.cancel();
     _cameraController.dispose();
     super.dispose();
   }
@@ -158,18 +131,19 @@ class _ArWithCameraState extends State<ArWithCamera> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: Text('AR', style: GoogleFonts.montserrat(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text('Ar',
+        style: GoogleFonts.montserrat(
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        )),
         backgroundColor: Constantes.backgroundColor,
       ),
-      body: !_isCameraInitialized
-          ? Center(child: CircularProgressIndicator())
-          : Stack(
+      body: _cameraController != null && _cameraController.value.isInitialized
+          ? Stack(
               children: [
                 Positioned.fill(
-                  child: AspectRatio(
-                    aspectRatio: _cameraController.value.aspectRatio,
-                    child: CameraPreview(_cameraController),
-                  ),
+                  child: CameraPreview(_cameraController),
                 ),
                 Align(
                   alignment: Alignment.center,
@@ -184,15 +158,28 @@ class _ArWithCameraState extends State<ArWithCamera> {
                     cameraOrbit: CameraOrbit(180, 180, 0),
                   ),
                 ),
-                // Align(
-                //   alignment: Alignment.topCenter,
-                //   child: Padding(
-                //     padding: const EdgeInsets.only(top: 50.0),
-                //     child: Text('Esperando datos de la brújula...'),
-                //   ),
-                // ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 50.0),
+                    child: StreamBuilder<CompassEvent>(
+                      stream: FlutterCompass.events,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          double heading = snapshot.data!.heading!;
+                          compassHeading = heading; // cambiar la dirección de la brújula
+                          _updateModelOrientation(); // cambiar la orientación del modelo 3D
+                          return Text('Brújula: ${heading.toStringAsFixed(2)}°');
+                        } else {
+                          return const Text('Esperando datos de la brújula...');
+                        }
+                      },
+                    ),
+                  ),
+                ),
               ],
-            ),
+            )
+          : Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -202,9 +189,4 @@ class LatLng {
   final double longitude;
 
   LatLng(this.latitude, this.longitude);
-
-  @override
-  String toString() {
-    return 'LatLng(latitude: $latitude, longitude: $longitude)';
-  }
 }
